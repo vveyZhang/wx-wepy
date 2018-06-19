@@ -1,0 +1,57 @@
+var payStatus = function(status) {
+  switch (status) {
+    case 'wait_pay':
+    return '待付款';
+    case 'wait_check':
+      return '待审核'
+    case 'wait_send':
+      return '待发货';
+    case 'wait_receive':
+      return '已发货';
+    case 'received':
+      return '已收货';
+    case 'appraised':
+      return '已评价';
+    case 'send_back':
+      return '已退货';
+    case 'pay_back':
+      return '已退款';
+    case 'canceled':
+      return '已取消';
+  }
+};
+
+var formatTime = function(date) {
+  var date = getDate(date);
+  var year = date.getFullYear();
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  var hour = date.getHours();
+  var minute = date.getMinutes();
+  var second = date.getSeconds();
+  return (
+    [year, month, day].map(formatNumber).join('-') +
+    ' ' +
+    [hour, minute, second].map(formatNumber).join(':')
+  );
+};
+// 过滤时间
+var formatDay = function(date) {
+  var date = getDate(date);
+  var year = date.getFullYear();
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  var hour = date.getHours();
+  var minute = date.getMinutes();
+  var second = date.getSeconds();
+  return [year, month, day].map(formatNumber).join('-');
+};
+var formatNumber = function(n) {
+  n = n.toString();
+  return n[1] ? n : '0' + n;
+};
+module.exports = {
+  payStatus: payStatus,
+  formatTime: formatTime,
+  formatDay: formatDay
+};

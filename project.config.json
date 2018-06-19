@@ -1,0 +1,145 @@
+{
+	"description": "加乐活商城",
+	"setting": {
+		"urlCheck": true,
+		"es6": false,
+		"postcss": false,
+		"minified": false,
+		"newFeature": true
+	},
+	"compileType": "miniprogram",
+	"appid": "wx6578e8ec8bb97236",
+	"projectname": "calohas-wx-bj",
+	"miniprogramRoot": "./dist",
+	"libVersion": "2.0.8",
+	"condition": {
+		"search": {
+			"current": -1,
+			"list": []
+		},
+		"conversation": {
+			"current": -1,
+			"list": []
+		},
+		"plugin": {
+			"current": -1,
+			"list": []
+		},
+		"game": {
+			"list": []
+		},
+		"miniprogram": {
+			"current": -1,
+			"list": [
+				{
+					"id": -1,
+					"name": "商城",
+					"pathName": "pages/tabs/shop",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "我的",
+					"pathName": "pages/tabs/mine",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "商品详情",
+					"pathName": "pages/goods/goods",
+					"query": "id=2"
+				},
+				{
+					"id": -1,
+					"name": "众筹",
+					"pathName": "pages/tabs/crowd",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "商品订单",
+					"pathName": "pages/order/list",
+					"query": ""
+				},
+				{
+					"id": 5,
+					"name": "订单详情",
+					"pathName": "pages/order/detail",
+					"query": "id=4643"
+				},
+				{
+					"id": -1,
+					"name": "众筹订单",
+					"pathName": "pages/order/crowd",
+					"query": "id=4643"
+				},
+				{
+					"id": -1,
+					"name": "文章",
+					"pathName": "pages/article/article",
+					"query": "id=1"
+				},
+				{
+					"id": -1,
+					"name": "我的收藏",
+					"pathName": "pages/mine/collect",
+					"query": "id=1"
+				},
+				{
+					"id": 9,
+					"name": "地址管理",
+					"pathName": "pages/mine/address-mine",
+					"query": "id=1"
+				},
+				{
+					"id": -1,
+					"name": "购物车",
+					"pathName": "pages/tabs/cart",
+					"query": "id=1"
+				},
+				{
+					"id": -1,
+					"name": "参与众筹-1",
+					"pathName": "pages/crowd/step-one",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "参与众筹-2",
+					"pathName": "pages/crowd/step-two",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "创建订单",
+					"pathName": "pages/order/create",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "添加地址",
+					"pathName": "pages/mine/address-add",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "支付结果",
+					"pathName": "pages/pay/result",
+					"query": "status=success"
+				},
+				{
+					"id": -1,
+					"name": "绑定手机号",
+					"pathName": "pages/mine/bang",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "持有人",
+					"pathName": "pages/crowd/benefit",
+					"query": "id=1"
+				}
+			]
+		}
+	}
+}

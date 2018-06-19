@@ -1,0 +1,52 @@
+<style lang="less">
+@import url('../theme/index.less');
+.search-container {
+  position: fixed;
+  width: 100%;
+  top: 0rpx;
+  left: 0rpx;
+  padding: 10px 0rpx;
+  z-index: 10;
+  transition: all 0.3s;
+  &.bg {
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0rpx 0rpx 6rpx 0rpx rgba(0, 0, 0, 0.1);
+  }
+}
+.search {
+  width: 70%;
+  margin: 0rpx auto;
+  background-color: rgba(225, 225, 225, 0.7);
+  box-sizing: border-box;
+  height: 24px;
+  border-radius: 15px;
+  font-size: 24rpx;
+  color: @color-placeholder;
+  line-height: 24px;
+  padding: 0rpx 20rpx;
+  box-shadow: 0rpx 0rpx 6rpx 0rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  display: -webkit-flex;
+  align-items: center;
+  .icon {
+    width: 15px;
+    height: 15px;
+    margin-right: 10rpx;
+  }
+}
+</style>
+<template>
+   <view class="search-container {{ scrollTop>=44? 'bg' : ''}} " >
+     <view class="search" ><image class="icon" src="../../asset/search.png" ></image> 搜索您想要的商品...</view></view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class Search extends wepy.component {
+  props = {
+    scrollTop: {
+      type: [Number, String],
+      default: 0
+    }
+  };
+}
+</script>

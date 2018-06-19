@@ -1,0 +1,166 @@
+<style lang="less" >
+@import url('../../theme/index.less');
+page {
+  background-color: #fff;
+}
+.tab {
+  display: flex;
+  display: -webkit-flex;
+  height: 8vh;
+  justify-content: center;
+  box-shadow: 0rpx 0rpx 6rpx 0rpx rgba(0, 0, 0, 0.1);
+  .tab-item {
+    width: 200rpx;
+    height: 6vh;
+    line-height: 6vh;
+    text-align: center;
+    margin: 1vh 0;
+    font-size: @size-title;
+    color: @color;
+    background-color: @theme-bg;
+    &.left {
+      border-top-left-radius: 3vh;
+      border-bottom-left-radius: 3vh;
+    }
+    &.right {
+      border-top-right-radius: 3vh;
+      border-bottom-right-radius: 3vh;
+    }
+    &.cur {
+      background-color: @redColor;
+      color: #fff;
+    }
+  }
+}
+.scroll {
+  height: 92vh;
+  overflow: hidden;
+}
+.no-more {
+  line-height: 60rpx;
+  text-align: center;
+  font-size: @size-min;
+  color: @color-gray;
+}
+</style>
+
+<template>
+<view class="tab" >
+   <view class="tab-item left {{status==1? 'cur' :''}}"  @tap='handleTab(1)' >新闻</view>
+   <view class="tab-item right {{status==2? 'cur' :''}}"  @tap='handleTab(2)' >宝典</view>
+</view>
+<scroll-view class="scroll" scroll-y="{{true}}" enable-back-to-top="{{true}}" @scrolltoupper="refrsh" @scrolltolower="loadingMore"  >
+    <view wx:if="{{status==1}}" >
+         <repeat for="{{news.list}}" item="item" >
+           <newItem @toDetail.user="toDetail" :item.sync="item" ></newItem>
+        </repeat>
+        <view class="no-more" wx:if="{{news.count<=news.list.length&&!news.loading}}"  >已加载全部</view>
+    </view>
+    <view wx:if="{{status==2}}" >
+         <repeat for="{{articles.list}}" item="item" >
+           <newItem @toDetail.user="toDetail" :item.sync="item" ></newItem>
+        </repeat>
+        <view class="no-more" wx:if="{{articles.count<=articles.list.length&&!articles.loading}}"  >已加载全部</view>
+    </view>
+</scroll-view>
+
+ 
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import NewsItem from '../../components/news-item';
+import { fetchNews, fetchArticles } from '../../store/actions';
+import { loading, hideLoading } from '../../utils/toast.js';
+@connect(
+  {
+    news(state) {
+      return state.article.news;
+    },
+    articles(state) {
+      return state.article.articles;
+    }
+  },
+  {
+    fetchNews,
+    fetchArticles
+  }
+)
+export default class Article extends wepy.page {
+  config = {
+    navigationBarTitleText: '文章'
+  };
+
+  data = {
+    status: 1
+  };
+  methods = {
+    handleTab(status) {
+      if (this.status == status) return;
+      this.status = status;
+      if (status == 1) return this.queryNews();
+      this.queryArticles();
+    },
+    refrsh() {
+      if (this.news.loading || this.articles.loading) return;
+      if (this.status == 1) return this.queryNews(1);
+      this.queryArticles(1);
+    },
+    loadingMore() {
+      if (this.news.loading || this.articles.loading) return;
+      if (this.status == 1) {
+        console.log(this.news.count);
+        if (this.news.count <= this.news.list.length) return;
+        this.queryNews(this.news.page + 1);
+      } else {
+        if (this.articles.count <= this.articles.list.length) return;
+        this.queryArticles(this.articles.page + 1);
+      }
+    },
+    toDetail(id) {
+      if (this.status == 1) {
+        wepy.navigateTo({
+          url: `./newsDetail?id=${id}`
+        });
+      } else {
+        wepy.navigateTo({
+          url: `./articleDetail?id=${id}`
+        });
+      }
+    }
+  };
+  components = {
+    newItem: NewsItem
+  };
+  watch = {
+    news(news) {
+      if (news.loading) return loading();
+      hideLoading();
+    },
+    articles(articles) {
+      if (articles.loading) return loading();
+      hideLoading();
+    }
+  };
+  onLoad(option) {
+    this.status = option.id;
+    console.log(option.id);
+    if (option.id == 1) {
+      this.queryNews();
+      return;
+    }
+    this.queryArticles();
+  }
+  queryNews(num) {
+    const { page } = this.news;
+    num = num ? num : page;
+    this.methods.fetchNews({ page: num });
+  }
+  queryArticles(num) {
+    const { page } = this.news;
+    num = num ? num : page;
+    this.methods.fetchArticles({ page: num });
+  }
+}
+</script>

@@ -1,0 +1,112 @@
+<style lang="less">
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+</style>
+
+<script>
+import wepy from 'wepy';
+import 'wepy-async-function';
+// import { userLogin } from './utils/getUser.js';
+import { setStore, connect } from 'wepy-redux';
+import store from './store';
+import { init } from './utils/index.js';
+setStore(store);
+export default class extends wepy.app {
+  config = {
+    pages: [
+      'pages/tabs/home',
+      'pages/tabs/shop',
+      'pages/tabs/crowd',
+      'pages/tabs/cart',
+      'pages/tabs/mine',
+      'pages/goods/goods',
+      'pages/order/list',
+      'pages/order/detail',
+      'pages/order/crowd',
+      'pages/order/crowd-detail',
+      'pages/order/create',
+      'pages/order/address-order',
+      'pages/article/article',
+      'pages/article/newsDetail',
+      'pages/article/articleDetail',
+      'pages/other/bannerDetail',
+      'pages/crowd/step-one',
+      'pages/crowd/step-two',
+      'pages/crowd/contet',
+      'pages/crowd/address-crowd',
+      'pages/crowd/benefit',
+      'pages/crowd/benefit-add',
+      'pages/mine/address-mine',
+      'pages/mine/address-editor',
+      'pages/mine/address-add',
+      'pages/mine/collect',
+      'pages/mine/bang',
+      'pages/pay/result'
+    ],
+    window: {
+      backgroundTextStyle: 'dark',
+      navigationBarBackgroundColor: '#4dc24d',
+      navigationBarTextStyle: 'white',
+      backgroundColor: '#ffffff'
+    },
+    tabBar: {
+      list: [
+        {
+          pagePath: 'pages/tabs/home',
+          text: '首页',
+          iconPath: './asset/home.png',
+          selectedIconPath: './asset/home-select.png'
+        },
+        {
+          pagePath: 'pages/tabs/shop',
+          text: '商城',
+          iconPath: './asset/shop.png',
+          selectedIconPath: './asset/shop-select.png'
+        },
+        {
+          pagePath: 'pages/tabs/crowd',
+          text: '众筹',
+          iconPath: './asset/zc.png',
+          selectedIconPath: './asset/zc-select.png'
+        },
+        {
+          pagePath: 'pages/tabs/cart',
+          text: '购物车',
+          iconPath: './asset/cart.png',
+          selectedIconPath: './asset/cart-select.png'
+        },
+        {
+          pagePath: 'pages/tabs/mine',
+          text: '我的',
+          iconPath: './asset/mine.png',
+          selectedIconPath: './asset/mine-select.png'
+        }
+      ],
+      backgroundColor: '#ffffff',
+      borderStyle: 'black',
+      color: '#353535',
+      selectedColor: '#4dc24d'
+    },
+    debug: true
+  };
+
+  globalData = {
+    userInfo: null
+  };
+  constructor() {
+    super();
+    this.use('requestfix');
+    this.use('promisify');
+  }
+
+  onLaunch() {
+    init();
+  }
+}
+</script>

@@ -1,0 +1,52 @@
+<style lang="less" >
+@import url('../../theme/index.less');
+page {
+  background-color: @theme-bg;
+}
+.nothing {
+  font-size: @size-content;
+  color: @color-placeholder;
+  line-height: 60rpx;
+  margin: 30rpx 0rpx;
+  text-align: center;
+}
+</style>
+
+<template>
+<repeat for="{{orders}}" item="item" >
+   <crowdItem :item.sync="item"  ></crowdItem>
+</repeat>
+ <view class="nothing" wx:if="{{orders.length<=0}}" >暂无订单</view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import CrowdItem from '../../components/crowd-item';
+import { fetchCrowd } from '../../store/actions';
+@connect(
+  {
+    orders(state) {
+      return state.crowd.orders;
+    },
+    loading(state) {
+      return state.crowd.orderLoading;
+    }
+  },
+  {
+    fetchCrowd
+  }
+)
+export default class OrderCrowd extends wepy.page {
+  config = {
+    navigationBarTitleText: '众筹订单'
+  };
+  data = {};
+  components = {
+    crowdItem: CrowdItem
+  };
+  onLoad() {
+    this.methods.fetchCrowd();
+  }
+}
+</script>

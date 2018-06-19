@@ -1,0 +1,51 @@
+<style lang="less">
+</style>
+
+<template>
+     <addressMine :address.sync="address" :id.sync="addressId" @tapItem.user="tap" ></addressMine>
+</template>
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+// import { loading, hideLoading } from '../../utils/toast.js';
+import { fetchAddress } from '../../store/actions';
+import AddressList from '../../components/address';
+import { request } from '../../utils/request.js';
+@connect(
+  {
+    address(state) {
+      return state.global.address;
+    }
+  },
+  {
+    fetchAddress
+  }
+)
+export default class Address extends wepy.page {
+  config = {
+    navigationBarTitleText: '地址管理'
+  };
+  components = {
+    addressMine: AddressList
+  };
+  computed = {
+    addressId() {
+      if (!this.address) return null;
+      for (let item of this.address) {
+        if (item.default) return item.id;
+      }
+    }
+  };
+  onShow() {
+    this.methods.fetchAddress();
+  }
+  methods = {
+    tap(id) {
+      request('/address/update', { id, default: 1 }).then(data => {
+        if (data.error.error_code != 0) return;
+        this.methods.fetchAddress();
+      });
+    }
+  };
+}
+</script>

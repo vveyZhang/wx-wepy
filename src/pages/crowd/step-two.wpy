@@ -1,0 +1,219 @@
+<style lang="less" >
+@import url('../../theme/index.less');
+page {
+  background-color: @theme-bg;
+}
+.crowd-content {
+  background-color: #ffffff;
+  padding: 20rpx 24rpx;
+  border: 1rpx solid #eeeeee;
+  .row {
+    display: flex;
+    display: -webkit-flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: @size-title;
+    line-height: 60rpx;
+    .label {
+      color: @color;
+    }
+    .content {
+      color: @color-placeholder;
+      text {
+        color: @redColor;
+      }
+    }
+  }
+}
+.crowd-address {
+  margin: 30rpx 0rpx;
+  background-color: #ffffff;
+  padding: 0rpx 24rpx;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: space-between;
+  align-items: center;
+  .no-address {
+    font-size: @size-title;
+    color: @color;
+    padding: 20rpx 0;
+  }
+  .address-content {
+    padding: 16rpx 0rpx;
+
+    .title {
+      font-size: @size-title;
+      color: @color;
+      .phone {
+        margin-left: 10rpx;
+      }
+    }
+    .detail {
+      margin-top: 16rpx;
+      line-height: 1.6;
+      font-size: @size-content;
+      color: @color-placeholder;
+    }
+  }
+  .right-ic {
+    width: 36rpx;
+    height: 36rpx;
+    display: block;
+  }
+}
+.crowd-btn {
+  margin: 80rpx 0rpx;
+  padding: 0rpx 24rpx;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: space-between;
+  align-items: center;
+  .btn {
+    height: 60rpx;
+    width: 240rpx;
+    border-radius: 8rpx;
+    line-height: 60rpx;
+    text-align: center;
+    background-color: @theme-color;
+    color: #ffffff;
+    font-size: @size-title;
+  }
+}
+</style>
+<template>
+<view class="crowd-content" >
+    <view class="row" >
+        <view class='label' >众筹数量</view>
+        <view class='content' ><text>{{crowd.number}}</text>份共计</view>
+    </view>
+    <view class="row" >
+        <view class='label' >支付总价</view>
+        <view class='content' ><text>{{crowd.number*crowd.price}}</text>元</view>
+    </view>
+</view>
+<view class="crowd-address" @tap="selectAddress" >
+    <view class="no-address" wx:if="{{address==null}}" >请选择地址</view>
+    <view class="address-content" wx:else >
+         <view class="title" >{{address.receiver}}<text class="phone" >{{address.mobile}}</text></view>
+         <view class="detail" >{{address.city}}{{address.address}}</view>
+    </view>
+     <image src="../../asset/right.png"  class="right-ic" ></image>
+</view>
+<view class="crowd-address" @tap="selectBenefit" >
+    <view class="no-address" wx:if="{{member==null}}" >请选择持有人</view>
+    <view class="address-content" wx:else >
+         <view class="title" >{{member.name}}<text class="phone" >{{name.mobile}}</text></view>
+         <view class="detail" >{{member.id_num}}</view>
+    </view>
+     <image src="../../asset/right.png"  class="right-ic" ></image>
+</view>
+<view class="crowd-btn" >
+    <view class="btn"  @tap="prev" >上一步</view>
+    <view class="btn"  @tap="toSubmit" > 提交</view>
+</view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import { SUBMIT_CROWD, SELECT_CROWD } from '../../store/types/crowd.js';
+import { fetchBenefit } from '../../store/actions/crowd.js';
+import { noIconToast } from '../../utils/toast.js';
+import { request } from '../../utils/request.js';
+@connect(
+  {
+    crowd(state) {
+      return state.crowd.crowd;
+    },
+    addresses(state) {
+      return state.global.address;
+    },
+    benefits(state) {
+      return state.crowd.benefits;
+    }
+  },
+  {
+    submit: SUBMIT_CROWD,
+    selectCrowd: SELECT_CROWD,
+    fetchBenefit
+  }
+)
+export default class StepTwo extends wepy.page {
+  config = {
+    navigationBarTitleText: '参与众筹'
+  };
+  data = {
+    user: null
+  };
+  computed = {
+    address() {
+      if (!this.addresses) return null;
+      for (let item of this.addresses) {
+        if (this.crowd.a_address_id == item.id) {
+          return item;
+        }
+      }
+      return null;
+    },
+    member() {
+      if (!this.benefits || this.benefits.length <= 0) return null;
+      if (!this.crowd.crowdfunding_beneficiary_id) null;
+      for (let item of this.benefits) {
+        if (item.id == this.crowd.crowdfunding_beneficiary_id) return item;
+      }
+      return null;
+    }
+  };
+  methods = {
+    prev() {
+      wepy.navigateBack();
+    },
+    selectAddress() {
+      wepy.navigateTo({
+        url: `./address-crowd`
+      });
+    },
+    selectBenefit() {
+      wepy.navigateTo({
+        url: './benefit'
+      });
+    },
+    toSubmit() {
+      if (!this.crowd.a_address_id) return noIconToast('请选择地址');
+      if (!this.crowd.crowdfunding_beneficiary_id) return noIconToast('请选择持有人');
+      request('/crowd-order/create', {
+        num: this.crowd.number,
+        a_address_id: this.crowd.a_address_id,
+        crowdfunding_beneficiary_id: this.crowd.crowdfunding_beneficiary_id
+      }).then(data => {
+        if (data.error.error_code != 0) return;
+        noIconToast('认筹成功');
+        setTimeout(() => {
+          wepy.redirectTo({
+            url: `../order/crowd`
+          });
+        }, 300);
+      });
+    }
+  };
+  watch = {
+    addresses(newV) {
+      this.getAddress(newV);
+    }
+  };
+  getAddress(addresses) {
+    if (!this.crowd.a_address_id) {
+      for (let item of addresses) {
+        if (item.default) {
+          this.methods.selectCrowd({ a_address_id: item.id });
+          return;
+        }
+      }
+    }
+  }
+  onLoad() {
+    this.getAddress(this.addresses);
+    this.methods.fetchBenefit();
+  }
+}
+</script>

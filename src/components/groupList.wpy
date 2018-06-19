@@ -1,0 +1,26 @@
+<style lang="less">
+.group-list {
+  border-top: 1rpx solid #dddddd;
+  border-bottom: 1rpx solid #dddddd;
+  background-color: #ffffff;
+}
+</style>
+
+<template>
+  <view class="group-list">
+    <slot></slot>
+  </view>
+</template>
+
+
+
+<script>
+import wepy from 'wepy';
+// import GroupItem from './groupitem';
+
+export default class GroupList extends wepy.component {
+  // options={
+  //   multipleSlots: true
+  // }
+}
+</script>

@@ -1,0 +1,9 @@
+export const FETCH_ADDRESS = 'FETCH_ADDRESS';
+
+export const USER_LOGIN = 'USER_LOGIN';
+
+export const FETCH_BANNER = 'FETCH_BANNER';
+
+export const CREATE_ADDRESS="CREATE_ADDRESS"
+
+export const UPDATE_ADDRESS="UPDATE_ADDRESS"

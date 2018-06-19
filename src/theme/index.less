@@ -1,0 +1,25 @@
+//颜色
+@color: #333;
+@redColor: #ff4444;
+@yellowColor: #ffc701;
+@theme-bg: #f2f2f4;
+@theme-color: #4dc24d;
+@color-content: #555;
+@color-gray: #999999;
+@color-placeholder: #7f8389;
+// 字体大小
+@size-title: 26rpx;
+@size-content: 24rpx;
+@size-price: 30rpx;
+@size-min: 22rpx;
+.ellipsis(@num: 2) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: @num;
+    -webkit-box-orient: vertical;
+}
+
+.transition( @prop: all, @time: 0.3s) {
+    transition: @prop @time
+}

@@ -1,0 +1,67 @@
+<style lang="less" >
+@import url('../../theme/index.less');
+.article-title {
+  font-size: @size-price;
+  color: @color;
+  line-height: 60rpx;
+  margin-bottom: 12rpx;
+}
+.article-container {
+  padding: 30rpx 30rpx;
+}
+.article-info {
+  line-height: 40rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #eeeeee;
+  font-size: @size-content;
+  .origin {
+    color: @color;
+  }
+  .time {
+    color: @color-placeholder;
+    margin-left: 20rpx;
+  }
+}
+.img_class {
+  width: 100%;
+}
+</style>
+<template>
+  <view class="article-container" >
+  <view class="article-content" >
+      <rich-text nodes="{{agree.content}}"></rich-text>
+  </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import { formatTime } from '../../utils/format.js';
+@connect({
+  agreement(state) {
+    return state.crowd.crowd.agreement;
+  }
+})
+export default class BannerDetail extends wepy.page {
+  data = {
+    agree: {}
+  };
+  computed = {
+    time() {
+      if (!this.article || !this.article.created_at) return '';
+      return formatTime(this.article.created_at);
+    },
+    content() {
+      if (!this.article || !this.article.content) return '';
+      return this.article.content.replace(/<img/g, `<img class='img_class'`);
+    }
+  };
+  onLoad(option) {
+    this.agree = this.agreement[option.index];
+    wepy.setNavigationBarTitle({
+      title: option.index == 0 ? '加乐活产品购买协议' : '加乐活会员协议'
+    });
+  }
+}
+</script>

@@ -1,0 +1,145 @@
+<style lang="less">
+@import url('../theme/index.less');
+.pay-way-container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  top: 0;
+  left: 0;
+  z-index: 10;
+  .pay-way {
+    .transition(bottom);
+    padding: 20rpx 0rpx;
+    width: 70%;
+    position: absolute;
+    bottom: 80rpx;
+    left: 15%;
+    background-color: #fff;
+    .pay-title {
+      padding: 0rpx 24rpx 12rpx 24rpx;
+      height: 60rpx;
+      text-align: center;
+      font-size: 34rpx;
+      color: @color-content;
+      border-bottom: 1rpx solid #eeeeee;
+    }
+    .pay-row {
+      display: flex;
+      display: -webkit-flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 80rpx;
+      border-bottom: 1rpx solid #eeeeee;
+      padding: 10rpx 24rpx;
+      .pay-icon {
+        width: 54rpx;
+        height: 54rpx;
+        display: block;
+      }
+      .pay-name {
+        font-size: @size-title;
+        color: @color;
+        flex: 1;
+        margin-left: 16rpx;
+      }
+      .pay-select {
+        height: 80rpx;
+        width: 80rpx;
+        image {
+          width: 40rpx;
+          height: 40rpx;
+          display: block;
+          margin: 20rpx auto;
+        }
+      }
+    }
+    .pay-content {
+      font-size: @size-title;
+      color: @color;
+      text-align: center;
+      line-height: 60rpx;
+      margin: 20rpx auto;
+      text {
+        font-size: @size-price;
+        color: @redColor;
+      }
+    }
+    .pay-btn {
+      background-color: @theme-color;
+      color: #fff;
+      text-align: center;
+      height: 60rpx;
+      line-height: 60rpx;
+      border-radius: 10rpx;
+      margin: 20rpx 34rpx;
+      font-size: @size-title;
+    }
+  }
+}
+</style>
+<template>
+<view class="pay-way-container" @tap="close" wx:if="{{show}}" >
+    <view class="pay-way" @tap.stop="tapContent" style="bottom:{{show?'80rpx':'-100%'}}"  >
+        <view class="pay-title" >选择支付方式</view>
+        <repeat for="{{payData}}" item="item"   >
+            <view class="pay-row" @tap="tapType({{item.type}})" >
+            <image class="pay-icon" src="{{item.icon}}" ></image>
+            <view class="pay-name" >{{item.name}}</view>
+            <view class="pay-select" >
+                <image src="{{type==item.type?selectIcon:unselectIcon}}" ></image>
+            </view>
+          </view>
+        </repeat>
+        <view class="pay-content" >
+            支付金额：<text>￥{{price}}</text>
+        </view>
+        <view class="pay-btn" @tap="tapPay" >确认支付</view>
+    </view>
+</view>
+</template>
+<script>
+import wepy from 'wepy';
+import { warningToast } from '../utils/toast.js';
+import Debounce from 'lodash-decorators/debounce';
+export default class Pay extends wepy.component {
+  props = {
+    payData: {
+      default: []
+    },
+    price: {
+      default: 0
+    },
+    show: {
+      default: false,
+      twoWay: true
+    }
+  };
+  data = {
+    type: null,
+    selectIcon: '/asset/selected-ic.png',
+    unselectIcon: '/asset/unselect-ic.png'
+  };
+  methods = {
+    tapType(type) {
+      this.type = type;
+      this.$apply();
+      this.$emit('chooseType', type);
+    },
+    tapContent(event) {
+      // event.stoppropagation();
+    },
+    @Debounce(300)
+    close() {
+      this.show = false;
+      this.$emit('payClose');
+    },
+
+    @Debounce(300)
+    tapPay() {
+      if (this.type == null) return warningToast('请选择支付方式');
+      this.$emit('pay');
+    }
+  };
+}
+</script>

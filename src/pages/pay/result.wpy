@@ -1,0 +1,68 @@
+<style lang="less" >
+@import url('../../theme/index.less');
+.content {
+  font-size: 34rpx;
+  line-height: 80rpx;
+  margin-top: 60rpx;
+  margin-bottom: 50rpx;
+  &.success {
+    color: @theme-color;
+  }
+  &.fail {
+    color: @redColor;
+  }
+  text-align: center;
+}
+.btn {
+  font-size: @size-title;
+  color: #ffffff;
+  view {
+    height: 60rpx;
+    width: 300rpx;
+    line-height: 60rpx;
+    text-align: center;
+    margin: 0rpx auto 30rpx auto;
+    background-color: @theme-color;
+    border-radius: 10rpx;
+  }
+}
+</style>
+<template>
+  <view class="content  {{status}} " >{{status=="success"?successTips:failTips}}</view>
+  <view class="btn" >
+      <view class="shop" @tap="goShop" >商城</view>
+       <view class="order" @tap="goOrder"  >查看订单</view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+export default class PayResult extends wepy.page {
+  config = {
+    navigationBarTitleText: '支付结果'
+  };
+  data = {
+    article: {},
+    successTips: '支付成功',
+    failTips: '支付失败',
+    status: 'success'
+  };
+  methods = {
+    goShop() {
+      wepy.switchTab({
+        url: '../tabs/shop'
+      });
+    },
+    goOrder() {
+      wepy.navigateTo({
+        url: '../order/list'
+      });
+    }
+  };
+  computed = {};
+  onLoad(option) {
+    this.status = option.status;
+  }
+}
+</script>

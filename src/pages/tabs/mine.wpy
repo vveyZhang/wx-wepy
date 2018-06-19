@@ -1,0 +1,185 @@
+<style lang="less" >
+@import url('../../theme/index.less');
+.user-content {
+  overflow: hidden;
+  position: relative;
+  .bg {
+    width: 100%;
+    display: block;
+  }
+  .user-info {
+    position: absolute;
+    width: 100%;
+    bottom: 30rpx;
+    .user-pic {
+      width: 140rpx;
+      height: 140rpx;
+      border-radius: 83rpx;
+      overflow: hidden;
+      border: 8rpx solid rgba(255, 255, 255, 0.2);
+      margin: 0rpx auto 16rpx auto;
+
+      image {
+        display: block;
+        width: 140rpx;
+        height: 140rpx;
+      }
+    }
+    .user-name {
+      font-size: @size-title;
+      color: #ffffff;
+      line-height: 1.6;
+      text-align: center;
+      white-space: nowrap;
+    }
+  }
+  .getUserInfo {
+    width: 100%;
+    left: 0rpx;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0);
+    font-size: 30rpx;
+    color: #ffffff;
+    line-height: 60rpx;
+    height: 60rpx;
+    top: 50%;
+    transform: translateY(50%);
+    outline: none;
+    &:focus {
+      background-color: rgba(0, 0, 0, 0);
+    }
+    &::after {
+      outline: none;
+      background-color: rgba(0, 0, 0, 0);
+      border: none;
+    }
+  }
+}
+page {
+  background-color: @theme-bg;
+}
+.user-list {
+  padding-top: 24rpx;
+}
+</style>
+
+<template>
+     <view class="user-content" >
+       <image class="bg" src="../../asset/mine-bg.jpg" mode="widthFix" ></image>
+       <view class="user-info" wx:if="{{login}}" >
+         <view class="user-pic" >
+           <image src="{{user.avatarUrl}}" ></image>
+         </view>
+         <view class="user-name" >{{user.nickName}}</view>
+          
+       </view>
+       <button open-type="getUserInfo" wx:else  @getuserinfo="onGetuserinfo" class="getUserInfo"  >点击登录</button>
+     </view>
+     <view class="user-list" >       
+       <grouplist>
+          <repeat  for="{{menuOrder}}" item="item" >
+           <groupitem :logo.sync="item.logo" :url.sync="item.url"  @push.user="toPush"  :title.sync="item.title" ></groupitem>
+        </repeat>
+       </grouplist>
+     </view>
+     <view class="user-list" >       
+       <grouplist>
+          <repeat  for="{{menus}}" item="item" >
+           <groupitem :logo.sync="item.logo" :url.sync="item.url" @push.user="toPush"  :title.sync="item.title" ></groupitem>
+         </repeat>
+       </grouplist>
+     </view>
+     <!-- <view class="user-list" >       
+       <grouplist>
+          <repeat  for="{{menuother}}" item="item" >
+           <groupitem :logo.sync="item.logo" :url.sync="item.url" @push.user="toPush"  :title.sync="item.title" ></groupitem>
+        </repeat>
+       </grouplist>
+     </view> -->
+
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import GroupList from '../../components/groupList';
+import GroupItem from '../../components/group-item';
+export default class Mine extends wepy.page {
+  config = {
+    navigationBarTitleText: '我的'
+  };
+  data = {
+    login: false,
+    user: {},
+    menuOrder: [
+      {
+        logo: '../../asset/crowed-order-ic.png',
+        title: '众筹订单',
+        url: '../order/crowd'
+      },
+      {
+        logo: '../../asset/order-ic.png',
+        title: '商品订单',
+        url: '../order/list'
+      }
+    ],
+    // menuother: [
+    //   {
+    //     logo: '../../asset/suggest-ic.png',
+    //     title: '我要反馈'
+    //   },
+    //   {
+    //     logo: '../../asset/about-ic.png',
+    //     title: '关于我们'
+    //   }
+    // ],
+    menus: [
+      {
+        logo: '../../asset/sc-select-ic.png',
+        title: '我的收藏',
+        url: '../mine/collect'
+      },
+      {
+        logo: '../../asset/address-ic.png',
+        title: '我的地址',
+        url: '../mine/address-mine'
+      }
+    ]
+  };
+  components = {
+    grouplist: GroupList,
+    groupitem: GroupItem
+  };
+  computed = {
+    getBMI() {
+      if (!this.user) return 0;
+      const height = Math.pow(this.user.height / 100, 2);
+      let bmi = this.user.weight / height;
+      bmi = bmi.toFixed(1);
+      return bmi;
+    }
+  };
+  methods = {
+    toPush(url) {
+      wepy.navigateTo({
+        url: url
+      });
+    },
+    onGetuserinfo(e) {
+      if (e.detail.userInfo) {
+        this.user = e.detail.userInfo;
+        this.login = true;
+      }
+    }
+  };
+  onLoad() {
+    wepy.getUserInfo().then(data => {
+      if (data.userInfo) {
+        this.user = data.userInfo;
+        this.login = true;
+        this.$apply();
+      }
+    });
+  }
+}
+</script>

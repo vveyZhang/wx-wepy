@@ -1,0 +1,51 @@
+<style lang="less">
+</style>
+
+<template>
+     <addressOrder :address.sync="addresses"  :id.sync="id"   @tapItem.user="tap" ></addressOrder>
+</template>
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+// import { loading, hideLoading } from '../../utils/toast.js';
+import { fetchAddress } from '../../store/actions';
+import AddressList from '../../components/address';
+import { CHANGE_ORDER_ADDRESS } from '../../store/types';
+@connect(
+  {
+    addresses(state) {
+      return state.global.address;
+    },
+    create(state) {
+      return state.order.create;
+    }
+  },
+  {
+    changeOrderAddress: CHANGE_ORDER_ADDRESS,
+    fetchAddress
+  }
+)
+export default class AddressOrder extends wepy.page {
+  config = {
+    navigationBarTitleText: '选择地址'
+  };
+  components = {
+    addressOrder: AddressList
+  };
+  onShow() {
+    this.methods.fetchAddress();
+  }
+  computed = {
+    id() {
+      if (!this.create) return null;
+      return this.create.address_id;
+    }
+  };
+  methods = {
+    tap(id) {
+      this.methods.changeOrderAddress({ address_id: id });
+      wepy.navigateBack();
+    }
+  };
+}
+</script>

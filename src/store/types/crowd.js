@@ -1,0 +1,8 @@
+export const FETCH_CROWD = 'FETCH_CROWD';
+export const FETCH_CROWD_DETAIL = 'FETCH_CROWD_DETAIL';
+
+export const FETCH_CROWD_ARGEE = 'FETCH_CROWD_ARGEE';
+export const SUBMIT_CROWD = 'SUBMIT_CROWD';
+export const SELECT_CROWD = 'SELECT_CROWD';
+
+export const FETCH_BENEFIT="FETCH_BENEFIT"

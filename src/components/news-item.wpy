@@ -1,0 +1,75 @@
+<style lang="less">
+@import url('../theme/index.less');
+.item-container {
+  &:last-child {
+    border-bottom: none;
+  }
+  margin-left: 24rpx;
+  border-bottom: 1rpx solid #dddddd;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14rpx 24rpx 14rpx 0rpx;
+  .content {
+    flex: 1;
+    margin-left: 20rpx;
+  }
+  .image {
+    height: 160rpx;
+    width: 160rpx;
+    display: block;
+  }
+  .title {
+    font-size: @size-title;
+    color: @color;
+    line-height: 1.2;
+    height: 2.8em;
+    overflow: hidden;
+    .ellipsis();
+  }
+  .info {
+    display: flex;
+    display: -webkit-flex;
+    justify-content: space-between;
+    align-items: center;
+    .number {
+      font-size: @size-min;
+      color: @color-content;
+    }
+    .time {
+      font-size: @size-min;
+      color: @color-gray;
+    }
+  }
+}
+</style>
+<template>
+  <view class="item-container" @tap="tap({{item.id}})" >
+      <image class="image" src="{{item.logo}}" ></image>
+      <view class="content" >
+           <view class="title" >{{item.title}}</view>
+           <view class="info" > <text class="number" >浏览人数：{{item.view_count}}</text> <text class="time" >{{time}}</text> </view>
+      </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import { formatDay } from '../utils/format.js';
+export default class NewsItem extends wepy.component {
+  props = {
+    item: {}
+  };
+  computed = {
+    time() {
+      if (!this.item || !this.item.created_at) return '';
+      return formatDay(this.item.created_at);
+    }
+  };
+  methods = {
+    tap(id) {
+      this.$emit('toDetail', id);
+    }
+  };
+}
+</script>

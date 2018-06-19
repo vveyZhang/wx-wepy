@@ -1,0 +1,92 @@
+zh-CN:
+  activerecord:
+    models:
+
+      #模型名称不能为复数形式。
+      role: 角色
+      menu: 权限菜单
+      lohas_user: 管理员用户
+      black_list: 黑名单
+      user: 普通用户
+      article_category: 宝典栏目
+      article_tag_type: 宝典标签类别
+      article_tag: 宝典标签
+      article: 宝典
+      post: 微博
+      a_payment: 付款记录
+      a_product: 商品
+      a_order: 订单
+      inventory: 库存记录
+      order_payment: 订单付款记录
+
+    attributes:
+      black_list/kind:
+        public: 私有黑名单
+        name: 记录黑名单
+      article_category/tp:
+        information: 资讯
+        buy_awards_notice: 团购获奖公告
+        brand_guide_info: 导购品牌资讯
+        brand_guide_story: 导购品牌故事
+      a_product/source:
+        China: 中国
+        USA: 美国
+      a_product/packet:
+        bag: 袋装
+        box: 盒装
+        bottle: 瓶装
+        canning: 罐装
+        individually: 独立包装
+      a_order/status:
+        wait_send: 待发货
+        wait_receive: 已发货
+        received: 已收货
+        appraised: 已评价
+        send_back: 已退货
+        pay_back: 已退款
+        wait_pay: 待付款
+        canceled: 已取消
+      a_order/sn_kind:
+        send_self: 自提
+        yuantong: 圆通
+        huitongkuaidi: 百世汇通
+        shentong: 申通
+        zhongtong: 中通
+        yunda: 韵达
+        ems: EMS
+        shunfeng: 顺丰
+        tiantian: 天天
+        quanfengkuaidi: 全峰
+        debangwuliu: 德邦
+        youzhengguonei: 邮政
+      a_order/kind:
+        tmall: 天猫
+        wechat: 微信
+        app: app
+        phone: 电话
+        other: 其他
+      adv/status:
+        unpublished: 未发布
+        testing: 测试中
+        published: 已发布
+      inventory/tp:
+        stock: 生产车间供货
+        send: 订单发货
+        send_back: 客户退货
+        company_in: 公司内转入
+        company_out: 公司内转出
+#        inside_in: 内部转入
+#        inside_out: 内部转出
+        loss: 破损
+      order_payment/kind:
+        alipay: 支付宝
+        crowdfunding: 众筹余额
+        lohas_score: 乐活豆抵现
+        wechat: 微信支付
+        other: 其他
+      crowdfunding_order/status:
+        wait_pay: 待付款
+        wait_check: 待审核
+        checked: 审核通过
+        rejected: 审核拒绝
+        canceled: 已取消

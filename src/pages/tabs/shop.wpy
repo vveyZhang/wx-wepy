@@ -1,0 +1,130 @@
+<style lang="less" >
+@import url('../../theme/index.less');
+page {
+  background-color: @theme-bg;
+}
+#body {
+  height: 100vh;
+  overflow: hidden;
+}
+// .search-warp {
+//   height: 44px;
+//   background-color: #ffffff;
+//   border-bottom: 1rpx solid #eeeeee;
+// }
+.main {
+  display: flex;
+  display: -webkit-flex;
+  .menu {
+    box-sizing: border-box;
+    overflow: hidden;
+    width: auto;
+    background-color: #ffffff;
+    .menu-item {
+      line-height: 80rpx;
+      padding: 0rpx 20rpx;
+      text-align: right;
+      height: 80rpx;
+      white-space: nowrap;
+
+      font-size: @size-min;
+      color: @color;
+      &.cur {
+        color: @redColor;
+        background-color: #ffffff;
+      }
+    }
+  }
+  .list {
+    flex: 2;
+    border-left: 1rpx solid #ffffff;
+    overflow: hidden;
+    box-sizing: border-box;
+    // background-color: #ffffff;
+  }
+}
+</style>
+
+<template>
+    <view id="body" >
+     <!-- <search :scrollTop.sync="scrollTop" scroll-y="{{true}}" ></search> -->
+     <view class="search-warp" ></view>
+     <view class="main" >
+        <scroll-view class="menu" style="height:{{height}}px" >
+          <repeat for="{{category}}"  item="item" >
+          <view  class="menu-item {{item==status? 'cur':''}}"  @tap="handleStatus({{item}})" >{{item}}</view>
+          </repeat>
+           
+        </scroll-view>
+        <scroll-view class="list" style="height:{{height}}px" scroll-y="{{true}}" >
+           <repeat for="{{products}}"  item="item" >
+             <goodsItem wx:if="{{status==item.category_name || status=='全部' }}"   :item.sync="item" ></goodsItem>
+           </repeat>
+        </scroll-view>
+     </view>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import { fetchProduct } from '../../store/actions';
+import { CHANGE_STATUS } from '../../store/types';
+import Search from '../../components/search';
+import GoodsItem from '../../components/goods-item';
+@connect(
+  {
+    products(state) {
+      return state.shop.products;
+    },
+    status(state) {
+      return state.shop.status;
+    },
+    category(state) {
+      return state.shop.category;
+    }
+  },
+  {
+    fetchProduct,
+    changeStaus: CHANGE_STATUS
+  }
+)
+export default class Shop extends wepy.page {
+  config = {
+    navigationBarTitleText: '商城',
+    enablePullDownRefresh: true
+  };
+  components = {
+    search: Search,
+    goodsItem: GoodsItem
+  };
+  data = {
+    scrollTop: 0,
+    height: 0
+  };
+  methods = {
+    handleStatus(status) {
+      this.methods.changeStaus(status);
+    }
+  };
+  onLoad(option) {
+    this.methods.fetchProduct();
+    const query = wepy.createSelectorQuery();
+    if (option.status) this.methods.changeStaus(status);
+    query.select('#body').boundingClientRect();
+    query.selectViewport();
+    query.exec(res => {
+      console.log(res)
+      this.height = res[0].height;
+      this.$apply();
+    });
+  }
+  onPageScroll(event) {
+    this.scrollTop = event.scrollTop;
+    this.$apply();
+  }
+  onPullDownRefresh() {
+    this.methods.fetchProduct();
+  }
+}
+</script>

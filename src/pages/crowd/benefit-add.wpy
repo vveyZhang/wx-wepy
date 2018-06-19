@@ -1,0 +1,200 @@
+<style lang="less">
+@import url('../../theme/index.less');
+.form {
+  background-color: #ffffff;
+  border-top: 1rpx solid #dddddd;
+  border-bottom: 1rpx solid #dddddd;
+}
+.form-item {
+  display: -webkit-flex;
+  display: flex;
+  border-bottom: 1rpx solid #eeeeee;
+  margin-left: 24rpx;
+  &.last {
+    border-bottom: none;
+  }
+  font-size: @size-title;
+  color: @color;
+  padding: 10rpx 24rpx 10rpx 0;
+  .form-label {
+    padding: 10rpx 0;
+    width: 120rpx;
+    line-height: 40rpx;
+  }
+  .form-warper {
+    flex: 1;
+    &.error {
+      .form-warper-content {
+        input {
+          border: 1rpx solid @redColor;
+        }
+      }
+    }
+  }
+  .form-warper-content {
+    input {
+      padding: 0rpx 16rpx;
+      font-size: @size-title;
+      height: 60rpx;
+      line-height: 60rpx;
+      box-sizing: border-box;
+    }
+    textarea {
+      // padding: 0rpx 16rpx;
+      font-size: @size-title;
+      line-height: 60rpx;
+      box-sizing: border-box;
+      width: 100%;
+      height: 120rpx;
+    }
+    .check-box {
+      display: -webkit-flex;
+      padding: 0rpx 16rpx;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      height: 60rpx;
+      image {
+        width: 34rpx;
+        height: 34rpx;
+        display: block;
+      }
+    }
+    .picker-content {
+      line-height: 60rpx;
+      height: 60rpx;
+      padding: 0rpx 16rpx;
+      .nothing {
+        color: @color-placeholder;
+      }
+      .value {
+        color: @color;
+      }
+    }
+  }
+  .form-warper-error {
+    padding: 0rpx 16rpx;
+    margin-top: 6rpx;
+    color: @redColor;
+    font-size: @size-content;
+    line-height: 32rpx;
+  }
+  .form-warper-tips {
+    padding: 0rpx 16rpx;
+    margin-top: 6rpx;
+    color: @color-placeholder;
+    font-size: @size-content;
+    line-height: 32rpx;
+  }
+}
+.setting {
+  display: -webkit-flex;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 50rpx 0rpx;
+  .btn {
+    background-color: @theme-color;
+    width: 220rpx;
+    height: 60rpx;
+    border-radius: 8rpx;
+    text-align: center;
+    font-size: @size-title;
+    color: #ffffff;
+    line-height: 60rpx;
+    margin: 0rpx 20rpx;
+    &.back {
+      background-color: rgba(0, 0, 0, 0);
+      box-sizing: border-box;
+      border: 1rpx solid @theme-color;
+      color: @theme-color;
+    }
+  }
+}
+</style>
+<template>
+  <view class="form" >
+    <view class="form-item" >
+      <view class="form-label" >姓名</view>
+      <view class="form-warper " >
+        <view class="form-warper-content" ><input type="text" @input="inputName" value="{{benefit.name}}"  placeholder="请输入收货人姓名" /></view>
+        <!-- <view class="form-warper-error" >错误</view>
+        <view class="form-warper-tips" >提示</view> -->
+      </view>
+    </view>
+    <view class="form-item" >
+      <view class="form-label" >联系电话</view>
+      <view class="form-warper " >
+        <view class="form-warper-content" ><input type="number" @input="inputMobile" value="{{benefit.mobile}}"   placeholder="请输入正确手机号" /></view>
+        <!-- <view class="form-warper-error" >错误</view>
+        <view class="form-warper-tips" >提示</view> -->
+      </view>
+    </view>
+    <view class="form-item last" >
+      <view class="form-label" >身份证号</view>
+      <view class="form-warper " >
+        <view class="form-warper-content" ><input type="number" @input="inputId_num" value="{{benefit.id_num}}"   placeholder="请输入正确身份证号" /></view>
+        <!-- <view class="form-warper-error" >错误</view>
+        <view class="form-warper-tips" >提示</view> -->
+      </view>
+    </view>
+    </view>
+          <view class="setting" >
+    <view class="btn" @tap="submit"  >确认添加</view>
+    <view class="btn back"  @tap="back" >返回</view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import { noIconToast } from '../../utils/toast.js';
+import Debounce from 'lodash-decorators/debounce';
+import { request } from '../../utils/request.js';
+
+export default class BenefitAdd extends wepy.page {
+  props = {
+    benefit: {
+      // type: Object,
+      default: {
+        name: null,
+        mobile: null,
+        id_num: null
+      }
+    }
+  };
+  data = {
+    unselect: '/asset/unselect-ic.png',
+    select: '/asset/selected-ic.png'
+  };
+  methods = {
+    inputName(event) {
+      const { value } = event.detail;
+      this.benefit.name = value;
+    },
+    inputMobile(event) {
+      const { value } = event.detail;
+      this.benefit.mobile = value;
+    },
+    inputId_num(event) {
+      const { value } = event.detail;
+      this.benefit.id_num = value;
+    },
+    back() {
+      wepy.navigateBack();
+    },
+    @Debounce(300)
+    submit() {
+      for (let key in this.benefit) {
+        if (this.benefit[key] == null || this.benefit[key] == '')
+          return noIconToast('请持有人信息完善信息');
+      }
+      request('/crowd-benefit/create', { ...this.benefit }).then(data => {
+        if (data.error.error_code != 0) return;
+        noIconToast('添加成功');
+        setTimeout(() => {
+          wepy.navigateBack();
+        }, 300);
+      });
+    }
+  };
+}
+</script>

@@ -1,0 +1,81 @@
+<style lang="less">
+@import url('../theme/index.less');
+.goods-item {
+  margin: 18rpx 24rpx;
+  padding: 18rpx;
+  background-color: #ffffff;
+  border-bottom: 1rpx solid #eeeeee;
+  &:last-child {
+    border-bottom: none;
+  }
+  //   box-shadow: 0rpx 0rpx 3rpx rgba(0, 0, 0, 0.1);
+  .item-row {
+    display: flex;
+    display: -webkit-flex;
+    justify-content: space-between;
+    .title {
+      .ellipsis();
+      font-size: @size-title;
+      line-height: 34rpx;
+      height: 68rpx;
+      margin-right: 10rpx;
+    }
+    .price {
+      color: @redColor;
+      font-size: @size-min;
+      margin-top: 15rpx;
+      text {
+        font-size: @size-price;
+      }
+    }
+    .num {
+      font-size: @size-min;
+      color: @color-content;
+    }
+    .goods-info {
+      flex: 1;
+    }
+    .goods-price {
+      display: flex;
+      display: -webkit-flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .image {
+      width: 130rpx;
+      height: 130rpx;
+    }
+  }
+}
+</style>
+<template>
+   <view class="goods-item" @tap="toGoodsDetails({{item.a_product_id}})" >
+       <view class="item-row" >
+           <image class="image" src="{{item.product_logo}}" ></image>
+           <view class="goods-info" >
+               <view class="title" >
+                   {{item.product_name}}
+               </view>
+               <view class="goods-price" >
+                   <view class='price' >￥<text>{{item.product_price}}</text></view>
+                   <view class="num" >x {{item.count}}</view>
+               </view>
+               </view>
+       </view>
+   </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class OrderGoodsItem extends wepy.component {
+  props = {
+    item: {}
+  };
+  methods = {
+    toGoodsDetails(id) {
+      wepy.navigateTo({
+        url: `/pages/goods/goods?id=${id}`
+      });
+    }
+  };
+}
+</script>

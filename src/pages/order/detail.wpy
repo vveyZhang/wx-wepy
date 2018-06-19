@@ -1,0 +1,215 @@
+<style lang="less" >
+@import url('../../theme/index.less');
+page {
+  background-color: @theme-bg;
+}
+.row-container {
+  padding: 30rpx 24rpx;
+  background-color: #ffffff;
+  .row {
+    font-size: @size-title;
+    line-height: 2;
+    .label {
+      color: @color-placeholder;
+    }
+    .content {
+      color: @color;
+    }
+  }
+  .flex-row {
+    font-size: @size-title;
+    line-height: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .label {
+      color: @color;
+    }
+    .content {
+      color: @redColor;
+      .extra {
+        font-size: @size-price;
+        color: @color;
+      }
+    }
+  }
+}
+.order-goods {
+  margin-top: 30rpx;
+  background-color: #ffffff;
+}
+.order-btn {
+  margin: 30rpx 24rpx;
+  .btn {
+    font-size: @size-title;
+    color: @redColor;
+    line-height: 2.4;
+    border-radius: 8rpx;
+    border: 1rpx solid @redColor;
+    text-align: center;
+    margin-bottom: 16rpx;
+  }
+}
+</style>
+
+<template>
+      <view class="row-container" >
+          <view class="row" >
+              <text class="label" >订单状态：</text>
+              <text class="content" >{{filter.payStatus(order.status)}}</text>
+          </view>
+          <view class="row" >
+              <text class="label" >订单编号：</text>
+              <text class="content" >{{order.fake_id}}</text>
+          </view>
+          <view class="row" >
+              <text class="label" >下单时间：</text>
+              <text class="content" >{{filter.formatTime(order.created_at)}}</text>
+          </view>
+          <view class="row" >
+              <text class="label" >收货人姓名：</text>
+              <text class="content" >{{address.receiver}}</text>
+          </view>
+          <view class="row" >
+              <text class="label" >收货人电话：</text>
+              <text class="content" >{{address.mobile}}</text>
+          </view>
+          <view class="row" >
+              <text class="label" >收货人地址：</text>
+              <text class="content" >{{address.address}}</text>
+          </view>
+      </view>
+      <view class="order-goods" >
+        <repeat for="{{order.details}}" item="item" >
+        <goodsItem :item.sync="item"  ></goodsItem>
+      </repeat>
+      </view>
+      <view class="row-container" >
+          <view class="flex-row" >
+              <text class="label" >商品价格：</text>
+              <text class="content" >￥{{goodsSum}}</text>
+          </view>
+          <view class="flex-row" >
+              <text class="label" > 优惠金额：</text>
+              <text class="content" >- ￥{{discount}}</text>
+          </view>
+          <view class="flex-row" >
+              <text class="label" ></text>
+              <text class="content" > <text class='extra' >实付金额：</text> ￥{{sum}}</text>
+          </view>
+      </view>
+      <view class="order-btn" >
+        <view class="btn" wx:if="{{order.status=='wait_pay'}}" @tap="toPay" >去支付</view>
+      </view>
+      <pay :payData.sync="payData"  :show.sync="show"  :price.sync="sum"  @pay.user="pay" @chooseType.user="chooseType"  ></pay>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import OrderGoodsItem from '../../components/order-goods-item';
+import { fetchOrders, fetchDetail } from '../../store/actions';
+import { successToast, errorToast } from '../../utils/toast.js';
+import { request } from '../../utils/request.js';
+import Pay from '../../components/pay';
+import filter from '../../utils/index.wxs';
+@connect(
+  {
+    order(state) {
+      return state.order.order;
+    },
+    loading(state) {
+      return state.order.detailLoading;
+    },
+    addressArray(state) {
+      return state.global.address;
+    }
+  },
+  {
+    fetchOrders,
+    fetchDetail
+  }
+)
+export default class Detail extends wepy.page {
+  config = {
+    navigationBarTitleText: '订单详情'
+  };
+  data = {
+    type: null,
+    show: false,
+    payData: [
+      {
+        icon: '../../asset/ye-pay-ic.png',
+        name: '余额支付',
+        type: 1
+      }
+    ]
+  };
+  wxs = {
+    filter:filter
+  };
+  components = {
+    goodsItem: OrderGoodsItem,
+    pay: Pay
+  };
+  computed = {
+    address() {
+      if (!this.addressArray || !this.order || !this.order.a_address_id)
+        return {};
+      for (let item of this.addressArray) {
+        if (item.id == this.order.a_address_id) return item;
+      }
+    },
+    goodsSum() {
+      if (!this.order || !this.order.details) return '0.00';
+      let total = 0;
+      for (let item of this.order.details) {
+        total += item.product_price * item.count;
+      }
+      return total.toFixed(2);
+    },
+    discount() {
+      if (!this.order || !this.order.details) return '0.00';
+      let total = 0;
+      for (let item of this.order.details) {
+        total += (item.product_price - item.price) * item.count;
+      }
+      return total.toFixed(2);
+    },
+    sum() {
+      if (!this.order || !this.order.details) return '0.00';
+      let total = 0;
+      for (let item of this.order.details) {
+        total += item.sum;
+      }
+      return total.toFixed(2);
+    }
+  };
+  methods = {
+    chooseType(type) {
+      this.type = type;
+    },
+    pay() {
+      this.payBalance();
+    },
+    toPay() {
+      this.show = true;
+    }
+  };
+  onLoad(option) {
+    this.methods.fetchDetail({ id: option.id });
+  }
+  payBalance() {
+    request('/order/payment-by-balance', {
+      order_id: this.order.id
+    }).then(data => {
+      if (data.error.error_code != 0) {
+        errorToast('支付失败');
+        return;
+      }
+      successToast('支付成功');
+      this.methods.fetchDetail({ id: this.order.id });
+    });
+  }
+}
+</script>

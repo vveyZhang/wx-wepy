@@ -1,0 +1,214 @@
+<style lang="less" >
+@import url('../../theme/index.less');
+page {
+  background-color: @theme-bg;
+}
+.row-container {
+  padding: 30rpx 24rpx;
+  background-color: #ffffff;
+  .row {
+    font-size: @size-title;
+    line-height: 2;
+    .label {
+      color: @color-placeholder;
+    }
+    .content {
+      color: @color;
+    }
+  }
+  .flex-row {
+    font-size: @size-title;
+    line-height: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .label {
+      color: @color;
+    }
+    .content {
+      color: @redColor;
+      .extra {
+        font-size: @size-price;
+        color: @color;
+      }
+    }
+  }
+}
+.order-goods {
+  margin-top: 30rpx;
+  background-color: #ffffff;
+}
+.order-btn {
+  margin: 30rpx 24rpx;
+  .btn {
+    font-size: @size-title;
+    color: @redColor;
+    line-height: 2.4;
+    border-radius: 8rpx;
+    border: 1rpx solid @redColor;
+    text-align: center;
+    margin-bottom: 16rpx;
+  }
+}
+.crow-pay {
+  margin-top: 30rpx;
+  padding: 24rpx;
+  background-color: #ffffff;
+}
+.crow-pay-row {
+  font-size: @size-min;
+  color: @color-content;
+  margin-bottom: 10rpx;
+  text {
+    margin-left: 8rpx;
+    font-size: 18rpx;
+    color: rgb(35, 45, 196);
+  }
+}
+.pay_image {
+  width: 200rpx;
+  height: 200rpx;
+  line-height: 200rpx;
+  text-align: center;
+  font-size: @size-title;
+  color: @color;
+  margin: 40rpx auto;
+  border: 1rpx solid #dddddd;
+}
+.pingzheng {
+  image {
+    width: 400rpx;
+    display: block;
+    margin: 40rpx auto;
+  }
+}
+</style>
+
+<template>
+      <view class="row-container" >
+          <view class="row" >
+              <text class="label" >持有人：</text>
+              <text class="content" >{{order.name}}</text>
+          </view>
+          <view class="row" >
+              <text class="label" >订单号：</text>
+              <text class="content" >{{order.id}}</text>
+          </view>
+          <view class="row" >
+              <text class="label" >份数：</text>
+              <text class="content" >{{order.num}}</text>
+          </view>
+          <view class="row" >
+              <text class="label" >支付方式：</text>
+              <text class="content" >银行转账</text>
+          </view>
+          <view class="row" >
+              <text class="label" >创建时间：</text>
+              <text class="content" >{{filter.formatTime(order.created_at)}}</text>
+          </view>
+          <view class="row" >
+              <text class="label" >状态：</text>
+              <text class="content" >{{filter.payStatus(order.status)}}</text>
+          </view>
+      </view>
+      <view class="crow-pay" wx:if="{{order.status=='wait_pay'}}" >
+         <view class="crow-pay-row" >
+             本订单生成后15日内，请将上诉款项转入如下银行。然后上传凭证，逾期订单自动消失。
+         </view>
+         <view class="crow-pay-row" >
+             银行账户名：江苏伯克生物医药股份有限公司 <text @tap="copy('江苏伯克生物医药股份有限公司')" >复制</text>
+         </view>
+         <view class="crow-pay-row" >
+             开户行：南京银行扬州邗江支行 <text @tap="copy('南京银行扬州邗江支行')" >复制</text>
+         </view>
+         <view class="crow-pay-row" >
+             银行账户名：08080120210001445 <text @tap="copy('08080120210001445')" >复制</text>
+         </view>
+         <view class="pay_image"  @tap="upload" >
+            上传凭证
+         </view>
+      </view>
+      <view class="pingzheng" wx:else >
+         <image src="{{order.pingzheng}}" mode="widthFix" ></image>
+      </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import { fetchCrowd } from '../../store/actions';
+import filter from '../../utils/index.wxs';
+import { noIconToast } from '../../utils/toast.js';
+import { request } from '../../utils/request.js';
+@connect(
+  {
+    orders(state) {
+      return state.crowd.orders;
+    }
+  },
+  {
+    fetchCrowd
+  }
+)
+export default class CrowdDetail extends wepy.page {
+  config = {
+    navigationBarTitleText: '订单详情'
+  };
+  wxs = {
+    filter: filter
+  };
+  data = {
+    id: null,
+    order: {}
+  };
+  onLoad(option) {
+    this.id = option.id;
+    this.queryDetail(this.orders);
+  }
+  methods = {
+    copy(content) {
+      wepy
+        .setClipboardData({ data: content })
+        .then(() => noIconToast('复制成功'));
+    },
+    upload() {
+      wepy.chooseImage().then(res => {
+        var tempFilePaths = res.tempFilePaths;
+        console.log(res);
+        wepy
+          .uploadFile({
+            url: 'https://ngrok.calohas.com/upload',
+            filePath: tempFilePaths[0],
+            name: 'file'
+          })
+          .then(res => {
+            const data = JSON.parse(res.data);
+            if (data.error.error_code != 0) return noIconToast('上传失败');
+            request('/crowd-order/payment', {
+              id: this.id,
+              pingzheng: data.url
+            }).then(data2 => {
+              if (data2.error.error_code != 0) return noIconToast('上传失败');
+              this.methods.fetchCrowd();
+            });
+          });
+      });
+    }
+  };
+  watch = {
+    orders(newsV) {
+      this.queryDetail(newsV);
+    }
+  };
+  queryDetail(orders) {
+    for (let item of orders) {
+      if (item.id == this.id) {
+        this.order = item;
+        console.log(this.order);
+        this.$apply();
+        return;
+      }
+    }
+  }
+}
+</script>

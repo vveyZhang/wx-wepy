@@ -1,0 +1,249 @@
+<style lang="less" >
+@import url('../../theme/index.less');
+page {
+  background-color: @theme-bg;
+}
+.order-address {
+  margin-bottom: 30rpx;
+  background-color: #ffffff;
+  padding: 0rpx 24rpx;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: space-between;
+  align-items: center;
+  .no-address {
+    font-size: @size-title;
+    color: @color;
+    padding: 20rpx 0rpx;
+  }
+  .address-content {
+    padding: 16rpx 0rpx;
+
+    .title {
+      font-size: @size-title;
+      color: @color;
+      .phone {
+        margin-left: 10rpx;
+      }
+    }
+    .detail {
+      margin-top: 16rpx;
+      line-height: 1.6;
+      font-size: @size-content;
+      color: @color-placeholder;
+    }
+  }
+  .right-ic {
+    width: 36rpx;
+    height: 36rpx;
+    display: block;
+  }
+}
+.order-btn {
+  height: 80rpx;
+  width: 100%;
+  position: fixed;
+  left: 0rpx;
+  bottom: 0;
+  background-color: #ffffff;
+  box-shadow: 0rpx 0rpx 4rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  display: -webkit-flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: @size-title;
+  .price {
+    color: @color;
+    line-height: 80rpx;
+    margin-left: 24rpx;
+    text {
+      font-size: @size-price;
+      color: @redColor;
+    }
+  }
+  .btn {
+    width: 220rpx;
+    background-color: @redColor;
+    color: #ffffff;
+    text-align: center;
+    line-height: 80rpx;
+    height: 80rpx;
+  }
+}
+.create-order-container {
+  margin-bottom: 100rpx;
+}
+</style>
+
+<template>
+<view class="create-order-container" >
+    <view class="order-address" @tap="selectAddress" >
+    <view class="no-address" wx:if="{{address==null}}" >请选择地址</view>
+    <view class="address-content" wx:else >
+         <view class="title" >{{address.receiver}}<text class="phone" >{{address.mobile}}</text></view>
+         <view class="detail" >{{address.city}}{{address.address}}</view>
+    </view>
+     <image src="../../asset/right.png"  class="right-ic" ></image>
+   </view>
+ <view class="order-goods-container" >
+     <createOrderGoods  :goods.sync="goods" @changeGoods.user="changeGoodsNumber"  :isEditor.sync="isEditor" @chooseType="chooseType"  @pay="pay" ></createOrderGoods>
+ </view>
+</view>
+ <view class="order-btn" >
+     <view class="price" >总价：<text>￥{{price}}</text></view>
+     <view class="btn" @tap="tapCreateOrder" >确认订单</view>
+ </view>
+ <pay :payData.sync="payData"  @payClose.user="payClose" :show.sync="show"  :price.sync="price"  @pay.user="pay" @chooseType.user="chooseType"  ></pay>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import {
+  CHANGE_ORDER_ADDRESS,
+  DELETE_GOODS,
+  CHANGE_ORDER_GOODS
+} from '../../store/types';
+import { createOrder } from '../../store/actions';
+import Debounce from 'lodash-decorators/debounce';
+import CreateOrderGoods from '../../components/create-order-goods';
+import Pay from '../../components/pay';
+import { request } from '../../utils/request.js';
+@connect(
+  {
+    addresses(state) {
+      return state.global.address;
+    },
+    create(state) {
+      return state.order.create;
+    }
+  },
+  {
+    changeOrderAddress: CHANGE_ORDER_ADDRESS,
+    deleteCarts: DELETE_GOODS,
+    chageOrderGoods: CHANGE_ORDER_GOODS,
+    createOrder
+  }
+)
+export default class Order extends wepy.page {
+  config = {
+    navigationBarTitleText: '确认订单'
+  };
+  data = {
+    isEditor: false,
+    show: false,
+    type: null,
+    payData: [
+      {
+        icon: '../../asset/ye-pay-ic.png',
+        name: '余额支付',
+        type: 1
+      }
+    ]
+  };
+  components = {
+    createOrderGoods: CreateOrderGoods,
+    pay: Pay
+  };
+  watch = {
+    create(newV, old) {
+      if (old.order.id != newV.order.id) {
+        this.methods.deleteCarts();
+        this.show = true;
+        this.$apply();
+      }
+    }
+  };
+  methods = {
+    @Debounce(300)
+    tapCreateOrder() {
+      const order_items = [];
+      for (let item of this.create.goods) {
+        order_items.push({
+          a_product_id: item.id,
+          count: parseInt(item.count)
+        });
+      }
+      this.methods.createOrder({
+        order_items: JSON.stringify(order_items),
+        address_id: this.create.address_id
+      });
+    },
+    selectAddress() {
+      wepy.navigateTo({
+        url: './address-order'
+      });
+    },
+    chooseType(type) {
+      this.type = type;
+    },
+    pay() {
+      this.payBalance();
+    },
+    changeGoodsNumber(index, count) {
+      // console.log(index,count)
+      this.methods.chageOrderGoods({ index, count });
+    },
+    payClose() {
+      wepy.navigateTo({
+        url: '../pay/result?status=fail'
+      });
+    }
+  };
+  payBalance() {
+    request('/order/payment-by-balance', {
+      order_id: this.create.order.id
+    }).then(data => {
+      if (data.error.error_code != 0) {
+        wepy.navigateTo({
+          url: '../pay/result?status=fail'
+        });
+        return;
+      }
+      wepy.navigateTo({
+        url: '../pay/result?status=success'
+      });
+    });
+  }
+
+  computed = {
+    goods() {
+      if (!this.create || !this.create.goods) return [];
+      return this.create.goods;
+    },
+    price() {
+      if (!this.create || !this.create.goods) return '0.00';
+      let price = 0;
+      for (let item of this.create.goods) {
+        price += item.count * item.price;
+      }
+      return price;
+    },
+    address() {
+      if (!this.addresses) return null;
+      for (let item of this.addresses) {
+        if (this.create.address_id == item.id) {
+          return item;
+        }
+      }
+      return null;
+    }
+  };
+  getAddress(addresses) {
+    if (!this.create.address_id) {
+      for (let item of addresses) {
+        if (item.default) {
+          this.methods.changeOrderAddress({ address_id: item.id });
+          return;
+        }
+      }
+    }
+  }
+  onLoad(option) {
+    //   console.log(this.create)
+    this.isEditor = option.type != 'cart';
+    this.$apply();
+    this.getAddress(this.addresses);
+  }
+}
+</script>

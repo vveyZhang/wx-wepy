@@ -1,0 +1,160 @@
+<style lang="less">
+@import url('../../theme/index.less');
+.login-container {
+  width: 80%;
+  min-width: 500rpx;
+  margin: 40rpx auto 0rpx auto;
+  padding-top: 40rpx;
+}
+.login-name {
+  border-bottom: 1rpx solid #eeeeee;
+  padding: 0rpx 24rpx;
+  input {
+    height: 60rpx;
+    line-height: 60rpx;
+    font-size: @size-title;
+  }
+}
+.login-message {
+  display: flex;
+  display: -webkit-flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20rpx;
+  input {
+    padding: 0rpx 24rpx;
+    height: 60rpx;
+    line-height: 60rpx;
+    font-size: @size-title;
+    border-bottom: 1rpx solid #eeeeee;
+    width: 200rpx;
+  }
+  .btn {
+    width: 200rpx;
+    font-size: @size-title;
+    text-align: center;
+    height: 60rpx;
+    line-height: 60rpx;
+    background-color: @theme-color;
+    color: #fff;
+  }
+  .btn.click {
+    background-color: #eeeeee;
+    color: #999999;
+  }
+}
+.login-btn {
+  margin-top: 60rpx;
+  height: 60rpx;
+  font-size: @size-title;
+  color: #fff;
+  text-align: center;
+  line-height: 60rpx;
+  background-color: @theme-color;
+  border-radius: 10rpx;
+  &.no {
+    background-color: #999999;
+  }
+}
+.user-bingd {
+  color: #999999;
+  font-size: @size-title;
+  padding: 50rpx 0rpx;
+  text-align: center;
+}
+</style>
+
+<template>
+<view class="user-bingd" wx:if="{{user.mobile}}" >已绑定手机号</view>
+<view class="login-container" wx:else >
+    <view class="login-name" >
+        <input  placeholder="请输入手机号" value="{{phome}}" @input="changePhone" />
+    </view>
+    <view class="login-message" >
+        <input placeholder="请输入验证码" value="{{captcha}}" @input="changeCaptcha"  />
+        <view class="btn" wx:if="{{time<=0}}" @tap="bang" > 获取验证码</view>
+        <view class="btn click"  wx:else >（{{time}}s后可获取）</view>
+    </view>
+
+    <view class="login-btn {{send?'':'no'}} " @tap="confrim" >
+       确认绑定
+    </view>
+</view>
+    
+</template>
+
+<script>
+import wepy from 'wepy';
+import { request, captcha } from '../../utils/request';
+import { connect } from 'wepy-redux';
+import { noIconToast } from '../../utils/toast.js';
+import { phoneExp } from '../../utils/config.js';
+
+@connect({
+  user(state) {
+    return state.global.user;
+  }
+})
+export default class UserBang extends wepy.page {
+  config = {
+    navigationBarTitleText: '绑定手机号'
+  };
+  data = {
+    send: false,
+    time: 0,
+    phone: null,
+    captcha: null
+  };
+  methods = {
+    changePhone(event) {
+      const { value } = event.detail;
+      this.phone = value;
+    },
+    changeCaptcha(event) {
+      const { value } = event.detail;
+      this.captcha = value;
+    },
+    confrim() {
+      if (!this.send) return;
+      if (!this.captcha) return noIconToast('请输入验证码');
+      const phonePattr = new RegExp(phoneExp);
+      if (!phonePattr.test(this.phone)) return noIconToast('手机号格式不正确');
+      request('/bind', { mobile: this.phone, code: this.captcha }).then(
+        data => {
+          if (data.error.error_code == 0) {
+            noIconToast('绑定成功');
+            setTimeout(
+              () =>
+                wepy.switchTab({
+                  url: '../tabs/mine'
+                }),
+              300
+            );
+          }
+        }
+      );
+    },
+    bang() {
+      const phonePattr = new RegExp(phoneExp);
+      if (!phonePattr.test(this.phone)) return noIconToast('手机号格式不正确');
+      captcha({ phone: this.phone }).then(data => {
+        if (data.error.error_code != 0) return;
+        noIconToast('发送成功');
+        this.time = 60;
+        this.send = true;
+        this.$apply();
+        this.timing();
+      });
+    }
+  };
+  timing() {
+    if (this.time > 0) {
+      setTimeout(() => {
+        this.time -= 1;
+        this.$apply();
+        this.timing();
+      }, 1000);
+    }
+  }
+}
+</script>

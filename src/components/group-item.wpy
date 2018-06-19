@@ -1,0 +1,87 @@
+<style lang="less">
+@import url('../theme/index.less');
+.list-item {
+  margin-left: 30rpx;
+  padding-right: 30rpx;
+  border-bottom: 1rpx solid rgba(216, 216, 216, 0.3);
+  display: flex;
+  display: -webkit-flex;
+  align-items: center;
+  &:last-child {
+    border-bottom: none;
+  }
+  .left,
+  .right {
+    display: flex;
+    display: -webkit-flex;
+    align-items: center;
+    white-space: nowrap;
+    height: 88rpx;
+  }
+  .left {
+    flex: 1;
+  }
+  .logo {
+    width: 46rpx;
+    height: 46rpx;
+  }
+  .title {
+    font-size: @size-title;
+    color: @color;
+    flex: 1;
+    margin-left: 20rpx;
+  }
+  .extra {
+    font-size: @size-content;
+    color: @color-placeholder;
+  }
+  .right-icon {
+    width: 30rpx;
+    height: 30rpx;
+    margin-left: 14rpx;
+  }
+}
+</style>
+<template>
+  <view class="list-item" @tap="tap({{url}})"  >
+     <view class="left" >
+       <image class="logo" src="{{logo}}" wx:if="{{logo}}" ></image>
+       <view class="title" >{{title}}</view>
+     </view>
+    <view class="right extra" >
+        <text wx:if="{{extra}}"  >{{extra}}</text>
+       <image class="right-icon" src="../asset/right.png" wx:if="{{right}}" ></image>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class GroupItem extends wepy.component {
+  options = {
+    multipleSlots: true
+  };
+  props = {
+    extra: {
+      type: String,
+      default: null
+    },
+    right: {
+      type: Boolean,
+      default: true
+    },
+    logo: {
+      type: String,
+      default: null
+    },
+    title: {
+      type: String,
+      default: null
+    }
+  };
+  methods = {
+    tap(url) {
+      this.$emit('push', url);
+    }
+  };
+}
+</script>

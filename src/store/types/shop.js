@@ -1,0 +1,3 @@
+export const FETCH_PRODUCT = 'FETCH_PRODUCT';
+
+export const CHANGE_STATUS = 'CHANGE_STATUS';

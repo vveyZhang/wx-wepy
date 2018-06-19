@@ -1,0 +1,41 @@
+<style lang="less">
+@import url('../../theme/index.less');
+</style>
+
+<template>
+   <addressForm  btnClass="确认添加"  @toSubmit.user="submit"  >
+   </addressForm>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import AddressForm from '../../components/address-form';
+import { crateAddress } from '../../store/actions';
+@connect(
+  {},
+  {
+    crateAddress
+  }
+)
+export default class AddressEditor extends wepy.page {
+  config = {
+    navigationBarTitleText: '添加地址'
+  };
+  components = {
+    addressForm: AddressForm
+  };
+  methods = {
+    submit(address) {
+      const { receiver, mobile, city, id } = address;
+      this.methods.crateAddress({
+        receiver,
+        mobile,
+        city,
+        address: address.address,
+        default: address.default
+      });
+    }
+  };
+}
+</script>

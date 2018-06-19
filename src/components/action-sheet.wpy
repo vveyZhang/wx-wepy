@@ -1,0 +1,54 @@
+<style lang="less">
+    .action-main {
+        background-color: rgba(0, 0, 0, .3);
+        position: fixed;
+        z-index: 10;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0
+    }
+
+    .action-content {
+        background-color: #fff;
+        position: absolute;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 24rpx;
+    }
+</style>
+<template>
+    <view class="action-main">
+        <view class="action-content">
+            <slot name="title"></slot>
+            <slot name="content"></slot>
+        </view>
+    </view>
+</template>
+<script>
+    import wepy from 'wepy'
+    export default class ActionSheet extends wepy.component {
+        data = {
+        }
+
+        events = {
+            'index-broadcast': (...args) => {
+                let $event = args[args.length - 1]
+                console.log(`${this.$name} receive ${$event.name} from ${$event.source.name}`)
+            }
+        }
+
+        methods = {
+            tap() {
+                // this.num = this.num + 1
+                console.log(this.$name + ' tap')
+            },
+            add() {
+                let len = this.list.length
+                this.list.push({ id: len + 1, title: 'title_' + len })
+            }
+        }
+        onLoad() {
+        }
+    }
+</script>

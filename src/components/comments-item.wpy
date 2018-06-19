@@ -1,0 +1,109 @@
+<style lang="less">
+@import url('../theme/index.less');
+.comments-item {
+  display: flex;
+  display: -webkit-flex;
+  border-bottom: 1rpx solid #eeeeee;
+  justify-content: space-between;
+  background-color: #ffffff;
+  padding: 16rpx 24rpx;
+}
+.user-pic {
+  width: 100rpx;
+  height: 100rpx;
+  display: block;
+}
+.comments-content {
+  flex: 1;
+  margin-left: 16rpx;
+  .content {
+    font-size: @size-content;
+    color: @color-content;
+    line-height: 1.6;
+    margin-top: 8rpx;
+  }
+  .user {
+    display: flex;
+    display: -webkit-flex;
+    align-items: center;
+    justify-content: space-between;
+    .user-left {
+      display: flex;
+      display: -webkit-flex;
+      align-items: center;
+    }
+    .name {
+      font-size: @size-title;
+      color: @color;
+      line-height: 40rpx;
+      margin-right: 16rpx;
+    }
+    .time {
+      //   align-self: flex-end;
+      font-size: @size-min;
+      color: @color-gray;
+      float: right;
+    }
+    .star,
+    .star .bg,
+    .star image {
+      width: 120rpx;
+    }
+    .star {
+      position: relative;
+      overflow: hidden;
+      .icon {
+        position: absolute;
+        overflow: hidden;
+        top: 0rpx;
+        left: 0;
+      }
+    }
+  }
+}
+</style>
+<template>
+   <view class="comments-item">
+       <image class="user-pic" src="{{item.user_logo}}" ></image>
+       <view class="comments-content" >
+           <view class="user" >
+               <view class="user-left" >
+                   <view class="name" >{{item.user_name}}</view>
+               <view class="star" >
+                   <view class="icon" style="width:{{(item.star/5)*100}}%" >
+                       <image src="../asset/star.png"  mode="widthFix"  ></image>
+                   </view>
+                   <view class="bg" >
+                        <image src="../asset/star-bg.png"  mode="widthFix" ></image>
+                   </view>
+               </view>
+               </view>
+               <view class="time" >{{time}}</view>
+           </view>
+           <view class="content" >
+               {{item.text}}
+           </view>
+       </view>
+   </view>
+</template>
+<script>
+import wepy from 'wepy';
+import { formatDay } from '../utils/format.js';
+export default class CommentsItem extends wepy.component {
+  props = {
+    item: {
+      type: Object,
+      default: {
+        updated_at: '0001-01-01T00:00:00Z'
+      }
+    }
+  };
+  computed = {
+    time() {
+      if (!this.item || !this.item.created_at) return '';
+      return formatDay(this.item.created_at);
+    }
+  };
+  methods = {};
+}
+</script>

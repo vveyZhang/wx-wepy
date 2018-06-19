@@ -1,0 +1,131 @@
+<style lang="less">
+@import url('../theme/index.less');
+.goods-item {
+  padding: 18rpx 24rpx;
+  background-color: #ffffff;
+  border-radius: 3rpx;
+  //   box-shadow: 0rpx 0rpx 3rpx rgba(0, 0, 0, 0.1);
+  .item-row {
+    display: flex;
+    display: -webkit-flex;
+    justify-content: space-between;
+    align-items: center;
+    .title {
+      .ellipsis();
+      font-size: @size-title;
+      line-height: 34rpx;
+      height: 68rpx;
+      margin-right: 10rpx;
+    }
+    .price {
+      color: @redColor;
+      font-size: @size-min;
+      margin-top: 15rpx;
+      text {
+        font-size: @size-price;
+      }
+    }
+    .goods-info {
+      flex: 1;
+      margin: 0rpx 30rpx;
+    }
+    .image {
+      width: 130rpx;
+      height: 130rpx;
+    }
+  }
+  .seletIcon {
+    width: 40rpx;
+    height: 40rpx;
+    display: block;
+  }
+}
+.goods-tools {
+  margin-top: 12rpx;
+  border-top: 1rpx solid #eeeeee;
+  padding-top: 10rpx;
+}
+.number-row {
+  height: 60rpx;
+  line-height: 60rpx;
+  font-size: @size-content;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: flex-end;
+  align-items: center;
+  image {
+    width: 40rpx;
+    height: 32rpx;
+    display: block;
+  }
+  input {
+    width: 100rpx;
+    height: 32rpx;
+    border: 1rpx solid #dddddd;
+    min-height: 32rpx;
+    margin: 0rpx 8rpx;
+    line-height: 32rpx;
+    font-size: @size-min;
+    text-align: center;
+  }
+}
+</style>
+<template>
+ <view wx:if="{{goods.length>0}}">
+   <repeat for="{{goods}}" key="id"  >
+      <view class="goods-item" >
+       <view class="item-row" >
+           <view class="goods-info" @tap="toGoodsDetails({{item.id}})" >
+               <view class="title" >
+                   {{item.name}}
+               </view>
+               <view class='price' >￥<text>{{item.price}}</text></view>
+               </view>
+           <image class="image" src="{{item.logo}}" @tap="toGoodsDetails({{item.id}})" ></image>
+       </view>
+       <view class="goods-tools" >
+           <view class="number-row" wx:if="{{isEditor}}" >
+                <text>购买数量：</text>
+                <image class="add" @tap="tapAdd({{index}},{{item.count}})" src="/asset/add-ic.png" ></image>
+                <input type="number" value="{{item.count}}" @blur="blur({{index}},{{this}})" @input="changeInput({{index}},{{this}})" />
+                <image class="add"  @tap="tapSub({{index}},{{item.count}})" src="/asset/sub-ic.png" ></image>
+           </view>
+           <view class="number-row" wx:else >
+               <text>购买数量：</text>x {{item.count}}
+            </view>
+       </view>
+   </view>
+ </repeat>
+ </view>
+</template>
+<script>
+import wepy from 'wepy';
+// import NumberInput from './number-Input';
+export default class CreateOrderGoods extends wepy.component {
+  props = {
+    goods: [],
+    isEditor: {
+      default: false
+    }
+  };
+  methods = {
+    tapAdd(index, count) {
+      this.$emit('changeGoods', index, count + 1);
+    },
+    blur(index, event) {
+      let count = parseInt(event.detail.value);
+      count = isNaN(count) ? 1 : count;
+      this.$emit('changeGoods', index, count);
+    },
+    changeInput(index, event) {
+      let count = parseInt(event.detail.value);
+      count = count <= 1 ? 1 : count;
+      this.$emit('changeGoods', index, count);
+    },
+    tapSub(index, count) {
+      count = count <= 1 ? 1 : count - 1;
+      this.$emit('changeGoods', index, count);
+    }
+  };
+}
+</script>

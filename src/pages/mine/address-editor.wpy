@@ -1,0 +1,52 @@
+<style lang="less">
+@import url('../../theme/index.less');
+</style>
+
+<template>
+   <addressForm :address.sync="address" btnClass="确认修改"  @toSubmit.user="submit"    >
+   </addressForm>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import AddressForm from '../../components/address-form';
+import { updateAddress } from '../../store/actions';
+@connect(
+  {
+    addresses(state) {
+      return state.global.address;
+    }
+  },
+  {
+    updateAddress
+  }
+)
+export default class AddressEditor extends wepy.page {
+  config = {
+    navigationBarTitleText: '编辑地址'
+  };
+  components = {
+    addressForm: AddressForm
+  };
+  data = {
+    address: {}
+  };
+  onLoad(option) {
+    this.address = this.addresses[option.index];
+  }
+  methods = {
+    submit(address) {
+      const { receiver, mobile, city, id } = address;
+      this.methods.updateAddress({
+        receiver,
+        mobile,
+        city,
+        address:address.address,
+        default: address.default,
+        id
+      });
+    }
+  };
+}
+</script>

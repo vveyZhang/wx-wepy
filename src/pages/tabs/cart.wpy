@@ -1,0 +1,230 @@
+<style lang="less" >
+@import url('../../theme/index.less');
+page {
+  background-color: @theme-bg;
+}
+.tools {
+  height: 8vh;
+  background-color: #ffffff;
+  padding: 0rpx 24rpx;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: space-between;
+  align-items: center;
+  .btn {
+    color: @redColor;
+    height: 8vh;
+    line-height: 8vh;
+    padding: 0rpx 10rpx;
+    font-size: @size-title;
+  }
+  .seletIcon {
+    float: left;
+  }
+}
+.seletIcon {
+  width: 40rpx;
+  height: 40rpx;
+  display: block;
+}
+.cart-footer {
+  height: 80rpx;
+  position: fixed;
+  width: 100%;
+  box-sizing: border-box;
+  line-height: 80rpx;
+  bottom: 0;
+  z-index: 10;
+  left: 0;
+  background-color: #ffffff;
+  box-shadow: 0rpx 0rpx 6rpx rgba(0, 0, 0, 0.1);
+}
+.cart-buy {
+  padding-left: 24rpx;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: space-between;
+  .text {
+    font-size: @size-title;
+    color: @color;
+    text {
+      font-size: @size-price;
+      color: @redColor;
+    }
+  }
+  .btn {
+    height: 80rpx;
+    background-color: @redColor;
+    font-size: @size-title;
+    color: #ffffff;
+    text {
+      font-size: 20rpx;
+    }
+    width: 220rpx;
+    text-align: center;
+  }
+}
+.cart-setting {
+  padding: 0rpx 24rpx;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: space-between;
+  .text {
+    font-size: @size-title;
+    color: @color;
+    text {
+      font-size: @size-price;
+      color: @redColor;
+    }
+  }
+  .btn-contaienr {
+    display: flex;
+    display: -webkit-flex;
+    .btn {
+      height: 40rpx;
+      line-height: 40rpx;
+      text-align: center;
+      font-size: @size-min;
+      margin: 19rpx 0rpx 19rpx 20rpx;
+      width: 120rpx;
+      border-radius: 20rpx;
+      &.delete {
+        background-color: @redColor;
+        color: #ffffff;
+        border: 1rpx solid @redColor;
+      }
+      &.collect {
+        border: 1rpx solid @redColor;
+        color: @redColor;
+      }
+    }
+  }
+}
+</style>
+
+<template>
+  <view class="tools" >
+    <image class="seletIcon" src="{{select.length==carts.length&&select.length>0?selectIcon:unselectIcon}}"  @tap="selectAll" ></image>
+    <view class="btn" @tap="handleEditor" >{{isEditor?"完成":"编辑"}}</view>
+  </view>
+  <scroll-view class="cart-scroll" scroll-y="{{true}}" >
+       <cartsGoods :carts.sync="carts" @selectGoods.user="handleselect"  @changeGoods.user="changeGoods"  ></cartsGoods>
+  </scroll-view>
+  <view class="cart-footer" >
+     <view class="cart-buy" wx:if="{{!isEditor}}" >
+       <view class="text" >总计价格：<text>￥{{total}}</text></view>
+       <view class="btn" @tap="confirmOrder"  >去结账 <text>（{{count}}件）</text></view>
+     </view>
+      <view class="cart-setting" wx:else >
+       <view class="text" >选中：<text>{{count}}</text>件商品</view>
+       <view class="btn-contaienr" >
+           <view class="btn collect" >加入收藏</view>
+           <view class="btn delete" @tap="handelDelete" >删除</view>
+       </view>
+     </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import CartsGoods from '../../components/carts-goods';
+import { warningToast } from '../../utils/toast.js';
+import Debounce from 'lodash-decorators/debounce';
+import {
+  GET_CARTS,
+  DELETE_GOODS,
+  SELECT_ALL,
+  EDITOR_GOODS,
+  SELECT_GOODS,
+  HANDLE_EDITOR,
+  CREATE_ORDER_GOODS
+} from '../../store/types';
+
+@connect(
+  {
+    carts(state) {
+      return state.carts.carts;
+    },
+    select(state) {
+      return state.carts.select;
+    },
+    isEditor(state) {
+      return state.carts.isEditor;
+    }
+  },
+  {
+    getCarts: GET_CARTS,
+    deleteGoods: DELETE_GOODS,
+    selectAll: SELECT_ALL,
+    selectGoods: SELECT_GOODS,
+    editorGoods: EDITOR_GOODS,
+    handleEditor: HANDLE_EDITOR,
+    createOrderGoods: CREATE_ORDER_GOODS
+  }
+)
+export default class Cart extends wepy.page {
+  config = {
+    navigationBarTitleText: '购物车',
+    enablePullDownRefresh: true
+  };
+  components = {
+    cartsGoods: CartsGoods
+  };
+  data = {
+    selectIcon: '../../asset/selected-ic.png',
+    unselectIcon: '../../asset/unselect-ic.png'
+  };
+  computed = {
+    total() {
+      let total = 0;
+      if (typeof this.select == undefined || this.carts == undefined)
+        return '0.00';
+      for (let item of this.select) {
+        total += this.carts[item].count * this.carts[item].price;
+      }
+      return total;
+    },
+    count() {
+      let total = 0;
+      if (typeof this.select == undefined || this.carts == undefined)
+        return '0';
+      for (let item of this.select) {
+        total += this.carts[item].count;
+      }
+      return total;
+    }
+  };
+  methods = {
+    changeGoods(index, count) {
+      this.methods.editorGoods({ index, count });
+    },
+    handleselect(index) {
+      this.methods.selectGoods({ index });
+    },
+    @Debounce(300)
+    handelDelete() {
+      if (this.select.length <= 0) return warningToast('未选中任何商品');
+      this.methods.deleteGoods();
+    },
+    @Debounce(300)
+    confirmOrder() {
+      if (this.select.length <= 0) return warningToast('未选中任何商品');
+      const goods = [];
+      for (let index of this.select) {
+        goods.push(this.carts[index]);
+      }
+      this.methods.createOrderGoods({ goods: goods });
+      wepy.navigateTo({
+        url: '../order/create?type=cart'
+      });
+    }
+  };
+  onLoad() {
+    this.queryCarts();
+  }
+  queryCarts() {
+    this.methods.getCarts();
+  }
+}
+</script>

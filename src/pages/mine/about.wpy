@@ -1,0 +1,29 @@
+<style lang="less">
+@import url('../../theme/index.less');
+page {
+  background-color: @theme-bg;
+}
+.nothing {
+  font-size: @size-content;
+  color: @color-placeholder;
+  line-height: 60rpx;
+  margin: 30rpx 0rpx;
+  text-align: center;
+}
+</style>
+
+<template>
+    <!-- <repeat for="{{goods}}" item="item" >
+        <goodsItem :item.sync="item" ></goodsItem>
+    </repeat>
+    <view class="nothing" wx:if="{{!frist&&goods.length<=0&&!loading}}" >您暂未收藏任何商品</view> -->
+</template>
+<script>
+import wepy from 'wepy';
+export default class About extends wepy.page {
+  config = {
+    navigationBarTitleText: '关于我们',
+    enablePullDownRefresh: true
+  };
+}
+</script>

@@ -1,0 +1,294 @@
+<style lang="less">
+@import url('../../theme/index.less');
+page {
+  background-color: @theme-bg;
+}
+
+.goods-container {
+  position: relative;
+  overflow: hidden;
+  height: 92vh;
+}
+
+.goods-tab {
+  height: 8vh;
+  line-height: 8vh;
+  display: flex;
+  display: -webkit-flex;
+  background-color: @theme-color;
+  justify-content: center;
+  z-index: 2;
+  .item {
+    padding: 0rpx 16rpx;
+    margin: 0rpx 10rpx;
+    font-size: @size-title;
+    color: #fff;
+    &.cur {
+      color: @redColor;
+    }
+  }
+}
+
+.goods-pics {
+  image {
+    width: 100%;
+    display: block;
+  }
+}
+
+.goods-info {
+  padding: 24rpx;
+  background-color: #fff;
+  .name {
+    font-size: @size-title;
+    color: @color;
+    line-height: 40rpx;
+  }
+  .price {
+    margin-top: 10rpx;
+    color: @yellowColor;
+    font-size: @size-content;
+    text {
+      font-size: @size-price;
+    }
+  }
+}
+
+.title {
+  margin-top: 24rpx;
+  background-color: #fff;
+  padding: 0rpx 24rpx;
+  border-bottom: 1rpx solid #eeeeee;
+  height: 60rpx;
+  line-height: 60rpx;
+  font-size: @size-title;
+  color: @color;
+}
+
+.goods-detail {
+  padding: 24rpx;
+  background-color: #fff;
+  rich-text {
+    overflow: hidden;
+  }
+  margin-bottom: 46px;
+}
+.img_class {
+  width: 100%;
+}
+.tools {
+  height: 46px;
+  background-color: #fff;
+  width: 100%;
+  position: absolute;
+  z-index: 2;
+  bottom: 0;
+  box-shadow: 0rpx 0rpx 6rpx 0rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  display: -webkit-flex;
+  align-items: center;
+  justify-content: flex-end;
+  .car-icon-waper {
+    flex: 1;
+  }
+  .car-icon {
+    position: relative;
+    margin: 0 auto;
+    width: 24px;
+    image {
+      height: 24px;
+      width: 24px;
+      display: block;
+    }
+    .num {
+      height: 20px;
+      width: 20px;
+      border-radius: 10px;
+      background-color: @redColor;
+      color: #fff;
+      font-size: 20rpx;
+      text-align: center;
+      line-height: 20px;
+      position: absolute;
+      top: -8px;
+      right: -10px;
+    }
+  }
+  .btn {
+    color: #fff;
+    height: 46px;
+    width: 130px;
+    font-size: @size-title;
+    text-align: center;
+    line-height: 46px;
+
+    &.car {
+      background-color: @redColor;
+    }
+    &.buy {
+      background-color: @yellowColor;
+    }
+  }
+}
+</style>
+
+<template>
+  <view class="goods-tab" id="tab">
+    <view class="item  {{index==0? 'cur' :'' }} " @tap="toView('goods')">商品</view>
+    <view class="item  {{index==1? 'cur' :'' }}  " @tap="toView('comments')">评论</view>
+    <view class="item  {{index==2? 'cur' :'' }}  " @tap="toView('detail')">详情</view>
+  </view>
+  <scroll-view class="goods-container" scroll-y="{{true}}" scroll-into-view="{{view}}" @scroll="scroll">
+    <view id="goods">
+      <view class="goods-pics">
+        <image src="{{goods.logo}}" mode="widthFix"></image>
+      </view>
+      <view class="goods-info">
+        <view class="name">{{goods.name}}</view>
+        <view class="price">￥
+          <text>{{goods.price}}</text>.00</view>
+      </view>
+    </view>
+    <view id="comments">
+      <view class="title">评论</view>
+      <repeat for="{{goods.comments}}" item="item">
+        <commentsItem :item.sync="item"></commentsItem>
+      </repeat>
+    </view>
+    <view id="detail">
+      <view class="title">详情</view>
+      <view class="goods-detail">
+        <rich-text nodes="{{detail}}"></rich-text>
+      </view>
+    </view>
+  </scroll-view>
+  <view class="tools" >
+    <view class="car-icon-waper" >
+      <view class="car-icon" >
+       <view class="num" >{{cartNumber}}</view>
+       <image src="../../asset/cart-ic.png" ></image>
+     </view>
+    </view>
+     <view class="car btn" @tap="add" >加入购物车</view>
+     <view class="buy btn" @tap="buy" >立即购买</view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import { fetchGoods } from '../../store/actions';
+import CommentsItem from '../../components/comments-item';
+import ActionSheet from '../../components/action-sheet';
+import Debounce from 'lodash-decorators/debounce';
+import { ADD_GOODS, GET_CARTS, CREATE_ORDER_GOODS } from '../../store/types';
+@connect(
+  {
+    carts(state) {
+      return state.carts.carts;
+    },
+    goods(state) {
+      return state.goods.goods;
+    },
+    loading(state) {
+      return state.goods.loading;
+    }
+  },
+  {
+    fetchGoods,
+    addCarts: ADD_GOODS,
+    getCarts: GET_CARTS,
+    createOrderGoods: CREATE_ORDER_GOODS
+  }
+)
+export default class Goods extends wepy.page {
+  config = {
+    navigationBarTitleText: '商品详情'
+  };
+  data = {
+    view: 'goods',
+    index: 0,
+    tabHeight: 0
+  };
+  computed = {
+    comments() {
+      if (!this.goods || !this.goods.comments) return [];
+      return this.goods.comments.slice(0, 2);
+    },
+    detail() {
+      if (!this.goods || !this.goods.detail) return '';
+      return this.goods.detail.replace(/<img/g, `<img class='img_class'`);
+    },
+    cartNumber() {
+      let total = 0;
+      if (!this.carts) return total;
+      for (let item of this.carts) {
+        total += item.count;
+      }
+      return total;
+    }
+  };
+  components = {
+    commentsItem: CommentsItem
+  };
+  methods = {
+    @Debounce(100)
+    toView(view) {
+      this.view = view;
+    },
+    scroll(event) {
+      const scrollTop = event.detail.scrollTop;
+      wepy
+        .createSelectorQuery()
+        .select('#comments')
+        .boundingClientRect(rect => {
+          if (rect.top - 1 > this.tabHeight) {
+            this.index = 0;
+          } else if (rect.height + rect.top > this.tabHeight) {
+            this.index = 1;
+          }
+          this.$apply();
+        })
+        .exec();
+      wepy
+        .createSelectorQuery()
+        .select('#detail')
+        .boundingClientRect(rect => {
+          if (rect.top - 1 <= this.tabHeight) {
+            this.index = 2;
+            this.$apply();
+          }
+        })
+        .exec();
+    },
+    add() {
+      this.methods.addCarts({ goods: this.goods });
+    },
+    buy() {
+      this.methods.createOrderGoods({
+        goods: [
+          {
+            ...this.goods,
+            count: 1
+          }
+        ]
+      });
+      wepy.navigateTo({
+        url: '../order/create?type=buy'
+      });
+    }
+  };
+  watch = {};
+  onLoad(option) {
+    this.methods.fetchGoods({ id: option.id });
+    this.methods.getCarts();
+    const queryTab = wepy.createSelectorQuery();
+    queryTab
+      .select('#tab')
+      .boundingClientRect(res => {
+        this.tabHeight = parseInt(res.height);
+      })
+      .exec();
+  }
+}
+</script>

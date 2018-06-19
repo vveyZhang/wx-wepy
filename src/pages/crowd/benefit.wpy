@@ -1,0 +1,134 @@
+<style lang="less">
+@import url('../../theme/index.less');
+page {
+  background-color: @theme-bg;
+}
+.benefit-list {
+  margin-bottom: 100rpx;
+  overflow: hidden;
+}
+.benefit-item {
+  // overflow: hidden;
+  border-bottom: 1rpx solid #eeeeee;
+  background: #ffffff;
+  padding: 16rpx 30rpx;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  .icon {
+    width: 40rpx;
+    height: 40rpx;
+    display: block;
+  }
+  .benefit-content {
+    margin: 0rpx 16rpx;
+    flex: 1;
+    .title {
+      font-size: @size-title;
+      color: @color;
+      height: 60rpx;
+      line-height: 60rpx;
+      .phone {
+        margin-left: 10rpx;
+      }
+    }
+    .detail {
+      font-size: @size-content;
+      color: @color-content;
+      max-width: 500rpx;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  .editor {
+    font-size: @size-title;
+    color: @redColor;
+    width: 60px;
+    text-align: center;
+  }
+}
+.benefit-add {
+  height: 80rpx;
+  background-color: #ffffff;
+  position: fixed;
+  z-index: 2;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  .add-btn {
+    background-color: @theme-color;
+    color: #ffffff;
+    width: 60%;
+    height: 60rpx;
+    line-height: 60rpx;
+    margin: 10rpx auto;
+    border-radius: 10rpx;
+    text-align: center;
+    font-size: @size-title;
+  }
+}
+</style>
+
+<template>
+   <view class="benefit-list" >
+         <repeat for="{{benefits}}" item="item" >
+             <view class="benefit-item"  @tap="tap({{item.id}})" >
+                <image  class="icon" src="{{item.id==crowd.crowdfunding_beneficiary_id?select:unselect}}" ></image>
+                <view class="benefit-content" >
+                     <view class="title" >{{item.name}}<text class="phone" >{{item.mobile}}</text></view>
+                     <view class="detail" >{{item.id_num}}</view>
+                </view>
+                <!-- <view class="editor" @tap.stop="toEdtior({{index}})" >编辑</view> -->
+           </view>
+         </repeat>
+     </view>
+     <view class="benefit-add" >
+         <view class="add-btn" @tap="toAdd" >添加持有人</view>
+     </view>
+</template>
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import { fetchBenefit } from '../../store/actions';
+import { SELECT_CROWD } from '../../store/types';
+@connect(
+  {
+    benefits(state) {
+      return state.crowd.benefits;
+    },
+    crowd(state) {
+      return state.crowd.crowd;
+    }
+  },
+  {
+    selectCrowd: SELECT_CROWD,
+    fetchBenefit
+  }
+)
+export default class BenefitCrowd extends wepy.page {
+  config = {
+    navigationBarTitleText: '选择持有人'
+  };
+  onShow() {
+    this.methods.fetchBenefit();
+  }
+  data = {
+    unselect: '../../asset/unselect-ic.png',
+    select: '../../asset/selected-ic.png'
+  };
+  methods = {
+    tap(id) {
+      this.methods.selectCrowd({ crowdfunding_beneficiary_id: id });
+      wepy.navigateBack();
+    },
+    toAdd() {
+      wepy.navigateTo({
+        url: './benefit-add'
+      });
+    }
+  };
+}
+</script>

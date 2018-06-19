@@ -1,0 +1,23 @@
+<style lang="less">
+@import url('../theme/index.less');
+.block {
+  border-top: 1rpx solid #dddddd;
+  border-bottom: 1rpx solid #dddddd;
+  background-color: @theme-bg;
+}
+</style>
+<template>
+  <view class="block" style="height:{{height}}rpx"  >
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class WitheBlock extends wepy.component {
+  props = {
+    height: {
+      type: [Number, String],
+      default: 30
+    }
+  };
+}
+</script>

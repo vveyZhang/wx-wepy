@@ -1,0 +1,41 @@
+<style lang="less" >
+</style>
+
+<template>
+<repeat for="{{orders}}" item="item" >
+   <orderItem :item.sync="item" ></orderItem>
+</repeat>
+ 
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import OrderItem from '../../components/order-item';
+import { fetchOrders } from '../../store/actions';
+@connect(
+  {
+    orders(state) {
+      return state.order.orders;
+    },
+    loading(state) {
+      return state.order.orderLoading;
+    }
+  },
+  {
+    fetchOrders
+  }
+)
+export default class Order extends wepy.page {
+  config = {
+    navigationBarTitleText: '商品订单'
+  };
+  data = {};
+  components = {
+    orderItem: OrderItem
+  };
+  onLoad() {
+    this.methods.fetchOrders();
+  }
+}
+</script>

@@ -1,0 +1,79 @@
+<style lang="less" >
+@import url('../../theme/index.less');
+.article-title {
+  font-size: @size-price;
+  color: @color;
+  line-height: 60rpx;
+  margin-bottom: 12rpx;
+}
+.article-container {
+  padding: 50rpx 30rpx;
+}
+.article-info {
+  line-height: 40rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #eeeeee;
+  font-size: @size-content;
+  .origin {
+    color: @color;
+  }
+  .time {
+    color: @color-placeholder;
+    margin-left: 20rpx;
+  }
+}
+.article-content {
+  padding: 40rpx 0rpx;
+}
+.img_class {
+    width: 100%;
+  }
+</style>
+<template>
+  <view class="article-container" >
+       <view class="article-title" >
+      {{article.title}}
+  </view>
+  <view class="article-info" >
+      <text class="origin" >{{article.origin_url}}</text>
+      <text class="time" >{{time}}</text>
+  </view>
+  <view class="article-content" >
+      <rich-text nodes="{{content}}"></rich-text>
+  </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import { formatTime } from '../../utils/format.js';
+@connect({
+  articles(state) {
+    return state.article.articles;
+  }
+})
+export default class ArticleDetail extends wepy.page {
+  config = {
+    navigationBarTitleText: '文章详情'
+  };
+  data = {
+    article: {}
+  };
+  computed = {
+    time() {
+      if (!this.article || !this.article.created_at) return '';
+      return formatTime(this.article.created_at);
+    },
+    content() {
+      if (!this.article || !this.article.content) return '';
+      return this.article.content.replace(/<img/g, `<img class='img_class'`);
+    }
+  };
+  onLoad(option) {
+    for (let item of this.articles.list) {
+      if (item.id == option.id) this.article = item;
+    }
+  }
+}
+</script>

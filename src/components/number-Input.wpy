@@ -1,0 +1,53 @@
+<style lang="less">
+@import url('../theme/index.less');
+.number-row {
+  height: 60rpx;
+  line-height: 60rpx;
+  font-size: @size-content;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: flex-end;
+  align-items: center;
+  image {
+    width: 52rpx;
+    height: 40rpx;
+    display: block;
+  }
+  input {
+    width: 100rpx;
+    height: 32rpx;
+    border: 1rpx solid #dddddd;
+    min-height: 32rpx;
+    margin: 0rpx 8rpx;
+    line-height: 32rpx;
+    font-size: @size-min;
+    text-align: center;
+  }
+}
+</style>
+<template>
+   <view class="number-row" >
+     {{index}}
+      <text>购买数量：</text>
+      <image class="add" @tap="tapAdd({{index}})" src="/asset/add-ic.png" ></image>
+      <input type="number" value="{{value}}" />
+      <image class="add"  @tap="tapSub({{index}})" src="/asset/sub-ic.png" ></image>
+   </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class NumberInput extends wepy.component {
+  props = {
+    value: 0,
+    index: 0
+  };
+  methods = {
+    tapAdd(index) {
+      this.$emit('numberAdd', index);
+    },
+    tapSub(index) {
+      this.$emit('numberSub', index);
+    }
+  };
+}
+</script>

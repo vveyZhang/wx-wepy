@@ -1,0 +1,125 @@
+<style lang="less">
+@import url('../theme/index.less');
+.list-container {
+  background-color: #ffffff;
+  margin-bottom: 20rpx;
+}
+.list-item {
+  border-bottom: 1rpx solid #eeeeee;
+  &:last-child {
+    border-bottom: none;
+  }
+  padding: 10rpx 0rpx;
+  margin: 0rpx 24rpx;
+
+  .list-item-row {
+    display: flex;
+    display: -webkit-flex;
+    justify-content: space-between;
+    .item {
+      flex: 1;
+      text-align: center;
+      font-size: @size-min;
+      line-height: 46rpx;
+      &.center {
+        flex: 2;
+      }
+      .label {
+        color: @color-content;
+      }
+      .content {
+        color: @color;
+        font-size: @size-content;
+      }
+    }
+  }
+}
+.list-footer {
+  height: 46rpx;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12rpx 24rpx;
+  margin: 0rpx 24rpx;
+  .price {
+    font-size: @size-content;
+    color: @color;
+    text {
+      font-size: @size-price;
+      color: @redColor;
+    }
+  }
+  image.right {
+    display: block;
+    width: 30rpx;
+    height: 30rpx;
+  }
+}
+</style>
+<template>
+   <view class="list-container" @tap="tap({{item.id}})" >
+       <view class="list-item" >
+        <view class="list-item-row" >
+             <view class="item" >
+                 <view class="label" >持有人</view>
+                 <view class="content" >{{item.name}}</view>
+             </view>
+             <view class="item center" >
+                 <view class="label" >订单号</view>
+                 <view class="content" >{{item.id}}</view>
+             </view>
+             <view class="item" >
+                 <view class="label" >份数</view>
+                 <view class="content" >{{item.num}}</view>
+             </view>
+        </view>
+        <view class="list-item-row" >
+             <view class="item" >
+                 <view class="label" >支付方式</view>
+                 <view class="content" >银行转账</view>
+             </view>
+             <view class="item center" >
+                 <view class="label " >创建时间</view>
+                 <view class="content" >{{filter.formatTime(item.created_at)}}</view>
+             </view>
+             <view class="item" >
+                 <view class="label" >状态</view>
+                 <view class="content" >{{filter.payStatus(item.status)}}</view>
+             </view>
+        </view>    
+        </view>
+        <view class="list-footer" >
+            <view class="price" >订单金额：<text>￥{{item.total_money}}</text></view>
+            <image class="right"  src="../asset/right.png" ></image>
+        </view>
+   </view>
+    
+</template>
+<script>
+import wepy from 'wepy';
+import { formatTime } from '../utils/format.js';
+import { payStatus } from '../utils/config.js';
+import filter from '../utils/index.wxs';
+export default class CrowdItem extends wepy.component {
+  props = {
+    item: {
+      default: {
+        created_at: ''
+      }
+    }
+  };
+  wxs = {
+    filter: filter
+  };
+  methods = {
+    tap(id) {
+      wepy.navigateTo({
+        url: `/pages/order/crowd-detail?id=${id}`
+      });
+    }
+  };
+
+  onLoad() {}
+}
+</script>

@@ -1,0 +1,65 @@
+<style lang="less">
+@import url('../theme/index.less');
+.goods-item {
+  margin: 18rpx 24rpx;
+  padding: 18rpx;
+  background-color: #ffffff;
+  border-radius: 3rpx;
+  //   box-shadow: 0rpx 0rpx 3rpx rgba(0, 0, 0, 0.1);
+  .item-row {
+    display: flex;
+    display: -webkit-flex;
+    justify-content: space-between;
+    .title {
+      .ellipsis();
+      font-size: @size-title;
+      line-height: 34rpx;
+      height: 68rpx;
+      margin-right: 10rpx;
+    }
+    .price {
+      color: @redColor;
+      font-size: @size-min;
+      margin-top: 15rpx;
+      text {
+        font-size: @size-price;
+      }
+    }
+    .goods-info {
+      flex: 1;
+    }
+    .image {
+      width: 130rpx;
+      height: 130rpx;
+    }
+  }
+}
+</style>
+<template>
+   <view class="goods-item" @tap="toGoodsDetails({{item.id}})" >
+       <view class="item-row" >
+           <view class="goods-info" >
+               <view class="title" >
+                   {{item.name}}
+               </view>
+               <view class='price' >￥<text>{{item.price}}</text></view>
+               </view>
+           <image class="image" src="{{item.logo}}" ></image>
+       </view>
+   </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class GoodsItem extends wepy.component {
+  props = {
+    item: {}
+  };
+  methods = {
+    toGoodsDetails(id) {
+      wepy.navigateTo({
+        url:`/pages/goods/goods?id=${id}`
+      })
+    }
+  };
+}
+</script>

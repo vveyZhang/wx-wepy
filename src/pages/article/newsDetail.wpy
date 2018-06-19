@@ -1,0 +1,32 @@
+<style lang="less" >
+@import url('../../theme/index.less');
+</style>
+<template>
+<web-view src="https://ngrok.calohas.com/wx/news/detail?id={{content.id}}"></web-view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+@connect({
+  news(state) {
+    return state.article.news;
+  }
+})
+export default class NewsDetail extends wepy.page {
+  config = {
+    navigationBarTitleText: '新闻详情'
+  };
+  data = {
+    content: {
+      id: null
+    }
+  };
+  onLoad(option) {
+    // console.log(this.news);
+    for (let item of this.news.list) {
+      if (item.id == option.id) this.content = item;
+    }
+  }
+}
+</script>

@@ -1,0 +1,46 @@
+
+<style lang="less" >
+@import url('../../theme/index.less');
+page {
+  background-color: @theme-bg;
+}
+.crowd-btn {
+  height: 60rpx;
+  background-color: @theme-color;
+  color: #ffffff;
+  text-align: center;
+  line-height: 60rpx;
+  width: 320rpx;
+  margin: 50rpx auto;
+  font-size: @size-title;
+  border-radius: 8rpx;
+}
+.crow-image {
+  image {
+    width: 100%;
+  }
+}
+</style>
+
+<template>
+  <view class="crowd-btn" @tap="tap" >参与众筹</view>
+  <view class="crow-image" >
+    <image  src="http://lohas.mamashai.com/uploads/image/201512/yonghu.jpg" mode="widthFix"  ></image>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class Crowd extends wepy.page {
+  config = {
+    navigationBarTitleText: '众筹'
+  };
+  methods = {
+    tap() {
+      wepy.navigateTo({
+        url: '../crowd/step-one'
+      });
+    }
+  };
+}
+</script>

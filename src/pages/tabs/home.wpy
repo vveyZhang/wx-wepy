@@ -1,0 +1,225 @@
+<style lang="less">
+@import url('../../theme/index.less');
+
+.swiper {
+  image {
+    display: block;
+    width: 100%;
+  }
+}
+.enter-container {
+  display: flex;
+  display: -webkit-flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 24rpx 10rpx;
+  box-sizing: border-box;
+  .item {
+    width: 20%;
+    text-align: center;
+    image {
+      display: block;
+      margin: 0rpx auto 10rpx auto;
+      width: 60rpx;
+      height: 60rpx;
+    }
+    view {
+      line-height: 40rpx;
+      color: @color;
+      font-size: @size-min;
+    }
+  }
+}
+.title {
+  padding: 0rpx 24rpx;
+  line-height: 80rpx;
+  height: 80rpx;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: space-between;
+  align-items: center;
+  .name {
+    font-size: @size-title;
+    color: @color;
+  }
+  .more {
+    font-size: @size-content;
+    color: @color-placeholder;
+  }
+}
+</style>
+
+
+<template>
+ <!-- <search :scrollTop.sync="scrollTop"  /> -->
+   <swiper indicator-dots="{{false}}"
+   style="height:{{height}}px"
+  autoplay="{{true}}" circular="{{true}}" class="swiper"  id="swiper" >
+  <block wx:for="{{banners}}" wx:key="item" >
+    <swiper-item @tap="bannerDetail({{item.id}})" >
+      <image @load="swiperLoad"  src="{{item.logo}}" mode="widthFix"  class="slide-image"/>
+    </swiper-item>
+  </block>
+</swiper>
+<view class="enter-container" >
+  <view class="item" @tap="handleStatus('多肽维生素饮料')"  >
+      <image src='../../asset/yl-icon.png' ></image>
+      <view>多肽饮料</view>
+  </view>
+  <view class="item" @tap="handleStatus('膳食纤维多肽')" >
+      <image src="../../asset/qw-icon.png" ></image>
+      <view>膳食纤维</view>
+  </view>
+  <view class="item" @tap="handleStatus('银杏多肽')" >
+      <image src="../../asset/yx-dbf.png" ></image>
+      <view>银杏</view>
+  </view>
+  <view class="item" @tap="handleStatus('茶芬多肽')" >
+      <image src="../../asset/cf.png"></image>
+      <view>茶酚</view>
+  </view>
+  <view class="item" @tap="handleStatus('银杏茶芬多肽')" >
+      <image src="../../asset/yx-cf.png" ></image>
+      <view>银杏茶酚</view>
+  </view>
+</view>
+ <witheBlock></witheBlock>
+ <view>
+    <view class="title" >
+      <text class="name" >新闻</text>
+      <text class="more" @tap="toNews" >查看更多</text>
+    </view>
+    <repeat for="{{newsList}}" item="item" >
+       <newsItem :item.sync="item" @toDetail.user="newsDetail" type="news" ></newsItem>
+    </repeat>
+ </view>
+  <witheBlock></witheBlock>
+ <view>
+    <view class="title" >
+      <text class="name" >宝典</text>
+      <text class="more" @tap="toArticles" >查看更多</text>
+    </view>
+    <repeat for="{{articlesList}}" item="item" >
+       <articleItem :item.sync="item" @toDetail.user="articleDetail" type="article" ></articleItem>
+    </repeat>
+ </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import WitheBlock from '../../components/withe-block';
+import NewsItem from '../../components/news-item';
+import Search from '../../components/search';
+import { CHANGE_STATUS } from '../../store/types';
+import { fetchNews, fetchArticles, fetchBanner } from '../../store/actions';
+import { init } from '../../utils';
+@connect(
+  {
+    news(state) {
+      return state.article.news.list;
+    },
+    articles(state) {
+      return state.article.articles.list;
+    },
+    banners(state) {
+      return state.global.banners;
+    }
+  },
+  {
+    changeStaus: CHANGE_STATUS,
+    fetchNews,
+    fetchArticles,
+    fetchBanner
+  }
+)
+export default class Home extends wepy.page {
+  config = {
+    navigationBarTitleText: '加乐活',
+    enablePullDownRefresh: true
+  };
+  data = {
+    height: 150,
+    scrollTop: 0
+  };
+  components = {
+    witheBlock: WitheBlock,
+    newsItem: NewsItem,
+    articleItem: NewsItem,
+    search: Search
+  };
+  computed = {
+    newsList() {
+      if (!this.news) return [];
+      return this.news.slice(0, 3);
+    },
+    articlesList() {
+      if (!this.articles) return [];
+      return this.articles.slice(0, 3);
+    }
+  };
+
+  methods = {
+    swiperLoad(event) {
+      if (this.height) return;
+      const { width, height } = event.detail;
+      const queryTab = wepy.createSelectorQuery();
+      queryTab
+        .select('#swiper')
+        .boundingClientRect(res => {
+          this.height = height * (parseInt(res.width) / width);
+          this.$apply();
+        })
+        .exec();
+    },
+    bannerDetail(id) {
+      wepy.navigateTo({
+        url: `../other/bannerDetail?id=${id}`
+      });
+    },
+    handleStatus(status) {
+      this.methods.changeStaus(status);
+      wepy.switchTab({
+        url: './shop'
+      });
+    },
+    articleDetail(id) {
+      wepy.navigateTo({
+        url: `../article/articleDetail?id=${id}`
+      });
+    },
+    newsDetail(id) {
+      wepy.navigateTo({
+        url: `../article/newsDetail?id=${id}`
+      });
+    },
+    toNews() {
+      wepy.navigateTo({
+        url: '../article/article?id=1'
+      });
+    },
+    toArticles() {
+      wepy.navigateTo({
+        url: '../article/article?id=2'
+      });
+    }
+  };
+  onLoad() {
+    init(()=>this.init());
+  }
+  init() {
+    this.methods.fetchBanner();
+    this.methods.fetchNews();
+    this.methods.fetchArticles();
+  }
+
+  onPageScroll(event) {
+    this.scrollTop = event.scrollTop;
+    this.$apply();
+  }
+  onPullDownRefresh() {
+    init(()=>this.init());
+  }
+}
+</script>

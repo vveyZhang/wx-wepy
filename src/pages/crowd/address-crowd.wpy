@@ -1,0 +1,50 @@
+<style lang="less">
+</style>
+
+<template>
+     <addressCrowd :address.sync="addresses"  :id.sync="id"   @tapItem.user="tap" ></addressCrowd>
+</template>
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import { fetchAddress } from '../../store/actions';
+import AddressList from '../../components/address';
+import { SELECT_CROWD } from '../../store/types';
+@connect(
+  {
+    addresses(state) {
+      return state.global.address;
+    },
+    crowd(state) {
+      return state.crowd.crowd;
+    }
+  },
+  {
+    selectCrowd: SELECT_CROWD,
+    fetchAddress
+  }
+)
+export default class AddressCrowd extends wepy.page {
+  config = {
+    navigationBarTitleText: '选择地址'
+  };
+  components = {
+    addressCrowd: AddressList
+  };
+  onShow() {
+    this.methods.fetchAddress();
+  }
+  computed = {
+    id() {
+      if (!this.crowd) return null;
+      return this.crowd.a_address_id;
+    }
+  };
+  methods = {
+    tap(id) {
+      this.methods.selectCrowd({ a_address_id: id });
+      wepy.navigateBack();
+    }
+  };
+}
+</script>

@@ -1,0 +1,157 @@
+<style lang="less" >
+@import url('../../theme/index.less');
+.label {
+  margin: 40rpx 0rpx 20rpx 0rpx;
+  font-size: @size-title;
+  color: @color-placeholder;
+  text-align: center;
+  &.min {
+    font-size: @size-min;
+    margin: 20rpx 0rpx;
+    // text-align: left;
+    width: 100%;
+  }
+}
+.price {
+  text-align: center;
+  line-height: 50rpx;
+  font-size: @size-title;
+  color: @color;
+  color: @redColor;
+  text {
+    font-size: 34rpx;
+  }
+}
+.tool {
+  display: flex;
+  display: -webkit-flex;
+  justify-content: center;
+  align-items: center;
+  image {
+    width: 52rpx;
+    height: 40rpx;
+  }
+  .number {
+    margin: 0rpx 30rpx;
+    height: 60rpx;
+    line-height: 60rpx;
+    border-bottom: 1rpx solid #dddddd;
+    width: 120rpx;
+    text-align: center;
+  }
+}
+.argeement-container {
+  width: 500rpx;
+  margin: 0rpx auto;
+}
+.argeement {
+  margin-top: 30rpx;
+  display: flex;
+  display: -webkit-flex;
+  justify-content: center;
+  align-items: center;
+  .status {
+    height: 30rpx;
+    width: 30rpx;
+    display: block;
+  }
+  .text {
+    font-size: @size-title;
+    color: @color;
+    margin: 0rpx 10rpx;
+  }
+  .content {
+    font-size: @size-title;
+    line-height: 34rpx;
+    color: @theme-color;
+  }
+}
+.submit {
+  height: 60rpx;
+  background-color: @theme-color;
+  color: #ffffff;
+  text-align: center;
+  line-height: 60rpx;
+  width: 320rpx;
+  margin: 50rpx auto;
+  font-size: @size-title;
+  border-radius: 8rpx;
+}
+</style>
+<template>
+    <view class="argeement-container" >
+         <view class="label" >总价</view>
+    <view class="price" >￥<text>{{crowd.number*crowd.price}}</text></view>
+      <view class="label" >购买数量</view>
+    <view class="tool" >
+      <image src="../../asset/add-ic.png"  @tap="add" ></image>
+      <view class="number" ><text>{{crowd.number}}</text>份</view>
+       <image src="../../asset/sub-ic.png"  @tap="sub" ></image>
+    </view>
+     <view class="label min" >注：每份10000元，可以认筹多份</view>
+     <view class="argeement" >
+       <image class="status" @tap="handleStatus"  src="{{crowd.status?check:uncheck}}" ></image>
+       <text class="text"  @tap="handleStatus"  >我同意</text>
+       <view class="content" >
+          <view @tap="handleAgree({{0}})" >《加乐活产品购买协议》</view>
+          <view @tap="handleAgree({{1}})"  >《加乐活会员协议》</view>
+       </view>
+     </view>
+     <view class="submit"  @tap="next" >下一步</view>
+    </view>
+    <addressForm></addressForm>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import { SELECT_CROWD, SUBMIT_CROWD } from '../../store/types/crowd.js';
+import { fetchCrowdArgee } from '../../store/actions/crowd.js';
+import { warningToast } from '../../utils/toast.js';
+@connect(
+  {
+    crowd(state) {
+      return state.crowd.crowd;
+    }
+  },
+  {
+    selectCrowd: SELECT_CROWD,
+    fetchCrowdArgee
+  }
+)
+export default class StepOne extends wepy.page {
+  config = {
+    navigationBarTitleText: '参与众筹'
+  };
+  data = {
+    uncheck: '../../asset/select-line-ic.png',
+    check: '../../asset/check_box _selected .png'
+  };
+  methods = {
+    add() {
+      this.methods.selectCrowd({ number: this.crowd.number + 1 });
+    },
+    sub() {
+      const number = this.crowd.number <= 1 ? 1 : this.crowd.number - 1;
+      this.methods.selectCrowd({ number: number });
+    },
+    handleStatus() {
+      this.methods.selectCrowd({ status: !this.crowd.status });
+    },
+    handleAgree(index) {
+      wepy.navigateTo({
+        url: `./contet?index=${index}`
+      });
+    },
+    next() {
+      if (!this.crowd.status) return warningToast('请同意相关协议');
+      wepy.navigateTo({
+        url: `./step-two`
+      });
+    }
+  };
+  onLoad() {
+    this.methods.fetchCrowdArgee();
+  }
+}
+</script>
